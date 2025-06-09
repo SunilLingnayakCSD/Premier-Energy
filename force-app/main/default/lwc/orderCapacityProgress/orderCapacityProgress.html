@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title="Order Capacity Overview" icon-name="custom:custom63">
+        <template if:true={dataLoaded}>
+            <div class="content">
+                <div class="progress-label">
+                    <p><strong>Invoiced Orders:</strong> {orderData.InvoiceOrders} MW</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style={invoiceOrdersStyle}></div>
+                    </div>
+                </div>
+                 <div class="progress-label">
+                    <p><strong>Booked Orders:</strong> {orderData.BookedOrders} MW</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style={bookedOrdersStyle}></div>
+                    </div>
+                </div>
+                <div class="progress-label">
+                    <p><strong>Annual Capacity:</strong> {orderData.AnnualCapacity} MW</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style={annualCapacityStyle}></div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template if:true={error}>
+            <div class="slds-text-color_error slds-p-horizontal_medium error-message">Error: {error}</div>
+        </template>
+    </lightning-card>
+</template>

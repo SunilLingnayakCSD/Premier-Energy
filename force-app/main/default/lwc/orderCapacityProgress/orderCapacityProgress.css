@@ -1,0 +1,29 @@
+.content {
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.progress-label {
+    margin-bottom: 1.5rem;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    height: 20px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.5s ease-in-out;
+}
+
+.error-message {
+    padding: 1rem;
+    color: #b00020;
+    font-weight: bold;
+}

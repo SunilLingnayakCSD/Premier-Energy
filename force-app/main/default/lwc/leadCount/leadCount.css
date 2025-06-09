@@ -1,0 +1,92 @@
+.submainContainer{
+    display: flex;
+    justify-content: space-around;
+    align-items: left;
+    width: 100%;
+    
+}
+p{
+    font-weight: bold;
+    font-size: 16px;
+}
+.subdiv1{
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: #0070d2;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+.subdiv1:hover {
+    transform: translateY(-10px); /* Slight lift effect on hover */
+}
+.subdiv2{
+    border: none;
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: green;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+.subdiv2:hover {
+    transform: translateY(-10px); /* Slight lift effect on hover */
+}
+.subdiv3{
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: #0070d2;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+.subdiv3:hover {
+    transform: translateY(-10px); /* Slight lift effect on hover */
+}
+.subdiv4{
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: green;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+.subdiv4:hover {
+    transform: translateY(-10px); /* Slight lift effect on hover */
+}
+.subdiv5{
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: #0070d2;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+.subdiv5:hover {
+    transform: translateY(-10px); /* Slight lift effect on hover */
+}
+
+.heading{
+    text-align: center;
+    
+}

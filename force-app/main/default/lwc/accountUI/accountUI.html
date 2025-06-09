@@ -1,0 +1,38 @@
+<template>
+    <div class={computedCardClass}>
+        <!-- Logo Section: Only Display When logoUrl is Present -->
+        <template if:true={logoUrl}>
+            <div class="logo-container">
+                <img src={logoUrl} alt="Account Logo" class="logo">
+            </div>
+        </template>
+
+        <template if:true={hasData}>
+            <div class="info">
+                <p>
+                    <strong class="label">Name:</strong> <span class="field-value">{accountData.Name}</span>
+                </p>
+                <p>
+                    <strong class="label">Phone:</strong> <span class="field-value">{accountData.Phone}</span>
+                </p>
+                <p>
+                    <strong class="label">Email:</strong> <span class="field-value">{accountData.Email__c}</span>
+                </p>
+                 <p>
+                    <strong class="label">Country:</strong> <span class="field-value">{accountData.BillingCountry}</span>
+                </p>
+                <p>
+                    <strong class="label">State:</strong> <span class="field-value">{accountData.BillingState}</span>
+                </p>
+                 <p>
+                    <strong class="label">City:</strong> <span class="field-value">{accountData.BillingCity}</span>
+                </p>
+                
+            </div>
+        </template>
+
+        <template if:true={error}>
+            <p style="color: red;">Error loading account details</p>
+        </template>
+    </div>
+</template>

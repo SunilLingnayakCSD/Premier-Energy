@@ -1,0 +1,22 @@
+<template>
+    <lightning-tabset onactive={handleTabChange}>
+        <!-- First Tab -->
+        <lightning-tab label="INPUT INBOUND LOGISTICS" name="tab1">
+            <div class="slds-p-around_medium">
+             <c-inputinboundlogistics></c-inputinboundlogistics>   
+                
+            </div>
+        </lightning-tab>
+
+         <!-- second Tab -->
+        <lightning-tab label="FRIEGHT CHARGES" name="tab2">
+            <div class="slds-p-around_medium">
+             <c-frieghtcharges></c-frieghtcharges>   
+                
+            </div>
+        </lightning-tab>
+
+        
+    </lightning-tabset>
+
+</template>

@@ -1,0 +1,67 @@
+.inventory tr:nth-child(even){background-color: #ffff;}
+ 
+.inventory tr:hover {background-color: #f3f3f4;}
+.custom-button{
+padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+    background-color: rgb(1, 118, 211);
+    color: white;
+    z-index: 1;
+}
+ .custom-table-title {
+  font-weight: bold;
+    color: #333;
+    text-align:left;
+     font-family: Arial, Helvetica, sans-serif;
+  }
+
+.inventory th {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  text-align: left;
+  background-color: #083d82 !important;
+  color: white;
+ 
+  /* width: 15%; */
+}
+.th ,.td{
+ 
+  min-width: 15%;
+  width: 15%;
+}
+.inputInside{
+  width: 60%;
+}
+.inventory td, .inventory th {
+  border: 1px solid #f3f3f4;
+  padding: 0px 4px;
+  text-align: left;
+  /* min-width: 15%; */
+ 
+}
+.inventory {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  padding: 6px 12px;
+  margin: 16px 0px;
+ 
+    overflow-y: auto; /* Enable vertical scroll */
+
+   }
+.cl{
+height: 15px;
+width: 15px;
+border-radius: 100%;
+}
+
+.search-input {
+    margin-bottom: 20px; /* Adds space between the search box and table */
+    width: 100%; /* Makes input field stretch across the container */
+}
+.custom-spacing {
+    margin-top: 20px; /* Adjust the space as needed */
+}

@@ -1,0 +1,78 @@
+/* Glass row styling */
+.glass-container {
+    background: rgba(255, 255, 255, 0.1);
+    
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+}
+
+/* Glass row styling - only for rows containing "Glass" */
+.glass-row {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: black;
+}
+
+/* China ADD% cell styling */
+.china-add-cell {
+    /* background-color: rgba(0, 112, 210, 0.3); */
+    position: relative;
+    cursor: pointer;
+}
+
+.china-add-cell:hover::after {
+    content: "USD/module";
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+/* Row-specific styling for first 3 glass rows */
+.glass-row:nth-child(-n+3) {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Table styling */
+.slds-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.slds-table th {
+    background-color: #f3f2f2;
+    padding: 12px 15px;
+}
+
+.slds-table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+/* Edit input styling */
+.cell-input {
+    width: 150px;
+}
+
+/* Button styling */
+lightning-button-icon {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}

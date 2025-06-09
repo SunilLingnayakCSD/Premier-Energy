@@ -1,0 +1,25 @@
+/* freightChargesEditor.css */
+.section-header th {
+    background-color: #f3f6f9;
+    font-weight: bold;
+    border-bottom: 2px solid #dddbda;
+    padding: 0.75rem;
+}
+
+.number-align {
+    text-align: left;
+    padding-right: 1.5rem;
+}
+
+.slds-table th, .slds-table td {
+    padding: 0.5rem 0.75rem;
+}
+
+.slds-table_cell-buffer tbody tr:not(:last-child)>td {
+    border-bottom: 1px solid #dddbda;
+}
+
+lightning-input {
+    --lwc-inputStaticFontSize: 0.875rem;
+    width: 120px;
+}

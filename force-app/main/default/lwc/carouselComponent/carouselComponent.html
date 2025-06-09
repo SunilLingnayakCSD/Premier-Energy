@@ -1,0 +1,17 @@
+<template>
+    <template if:true={imageUrls.length}>
+        <div class="carousel-wrapper">
+            <div class="carousel-track" style={trackStyle}>
+                <template for:each={imageUrls} for:item="imgUrl">
+                    <div key={imgUrl} class="carousel-item">
+                        <img src={imgUrl} class="carousel-image" alt="Carousel Image" />
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={imageUrls.length}>
+        <div class="no-images"></div>
+    </template>
+</template>

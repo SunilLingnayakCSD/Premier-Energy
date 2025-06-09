@@ -1,0 +1,25 @@
+<!-- countryStatePicklist.html -->
+<template>
+    <lightning-card title="Address Information">
+        <div class="slds-p-around_medium">
+            <lightning-combobox
+                name="country"
+                label="Billing Country"
+                value={selectedCountry}
+                options={countryOptions}
+                onchange={handleCountryChange}
+                required>
+            </lightning-combobox>
+
+            <lightning-combobox
+                name="state"
+                label="Billing State"
+                value={selectedState}
+                options={stateOptions}
+                onchange={handleStateChange}
+                required
+                disabled={isStateDisabled}>
+            </lightning-combobox>
+        </div>
+    </lightning-card>
+</template>

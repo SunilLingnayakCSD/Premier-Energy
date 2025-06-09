@@ -1,0 +1,58 @@
+<template>
+        <div class="card-container">
+            <template if:true={hasData}>
+
+                <!-- Authentication Section -->
+                <div class="authentication">
+                    <div class="profile-header">
+                        <!-- Show image only if image__c exists -->
+                        <template if:true={showImage}>
+                            <img src={imageUrl} alt="Profile Picture" class="profile-pic"/>
+                        </template>
+
+                        <!-- Profile info including name, profile completeness -->
+                        <div class="profile-info">
+                            <p class="name">{contactData.Name}</p>
+
+                            <!-- Profile Completeness Section -->
+                            <div class="profile-completeness">
+                                <p class="section-title">
+                                    &nbsp;Profile&nbsp;<span class="profile-completeness-text">{profileCompleteness}%</span> Complete
+                                    <!-- <span class="profile-completeness-text">{profileCompleteness}%</span> -->
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer details section below profile -->
+                <div class="details-container">
+                    <div class="details">
+                        <p class="info-item">
+                            <span class="info-label">Phone Number&nbsp;:</span> <span class="info-value">&nbsp;{contactData.Phone}</span>
+                        </p>
+                      <p class="info-item">
+                            <span class="info-label">Email ID&nbsp;:</span><span class="info-value">&nbsp;{contactData.Email}</span> 
+                        </p>
+                        <p class="info-item">
+                            <span class="info-label">Country&nbsp;:</span><span class="info-value">&nbsp;{contactData.MailingCountry}</span>
+                        </p>
+                        <p class="info-item">
+                            <span class="info-label">State&nbsp;:</span><span class="info-value">&nbsp;{contactData.MailingState}</span>
+                        </p>
+                        <p class="info-item">
+                            <span class="info-label">City&nbsp;:</span><span class="info-value">&nbsp;{contactData.MailingCity}</span> 
+                        </p>
+                        <p class="info-item">
+                            <span class="info-label">Customer Since&nbsp;:</span><span class="info-value">&nbsp;{contactData.Customer_Since__c}</span>  
+                        </p>
+                    </div>
+                </div>
+
+            </template>
+
+            <template if:true={error}>
+                <p style="color: red;">Error loading contact details</p>
+            </template>
+        </div>
+</template>

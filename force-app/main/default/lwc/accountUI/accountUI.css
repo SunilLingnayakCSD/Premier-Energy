@@ -1,0 +1,92 @@
+/* Reference static resource for Adobe Garamond Pro font */
+@font-face {
+    font-family: 'Adobe Garamond Pro';
+    src: url('/resource/AdobeGaramondPro/AdobeGaramondPro-Regular.woff2') format('woff2'),
+         url('/resource/AdobeGaramondPro/AdobeGaramondPro-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Full component container without card */
+.card-container {
+    /* Gradient background from Pantone 301C (Blue) to Pantone 369C (Green) */
+    background: linear-gradient(135deg, #0F6AB0, #62B847);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: left;
+    width: 100%;
+    height: 100%; /* Ensure it fills the parent container */
+    position: relative;
+    font-family: 'Adobe Garamond Pro', Arial, sans-serif; /* Apply Adobe Garamond Pro */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: white;  /* Ensures all text inside the card is white */
+}
+
+lightning-icon {
+    --slds-icon-text-default: white;
+}
+
+/* Reduce space when there's no logo */
+.no-logo {
+    padding-top: 10px !important;
+    margin-top: 0px !important;
+}
+
+/* Logo Container */
+.logo-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+/* Logo Styling */
+.logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Fields Styling */
+.info {
+    margin-top: 120px;
+    flex-grow: 1;
+}
+
+/* Adjust spacing when logo is not present */
+.no-logo .info {
+    margin-top: 20px; /* Reduce top margin */
+}
+
+/* Spacing between fields */
+p {
+    margin: 15px 0;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.label {
+    text-transform: uppercase; /* Make the labels capitalized */
+}
+
+/* Icon Styling */
+.icon {
+    margin-right: 10px;
+    --slds-icon-fill-color: white;
+}
+
+/* Adjust spacing between key and value */
+.field-value {
+    margin-left: 8px;
+    font-size: 15px;
+}
+
+.label, .field-value {
+    font-size: 16px; /* Adjust as needed */
+    font-weight: bold;
+}

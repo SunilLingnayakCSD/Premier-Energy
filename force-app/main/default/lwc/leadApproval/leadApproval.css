@@ -1,0 +1,9 @@
+.custom-container{
+	color : black;
+}
+
+.no-wrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

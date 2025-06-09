@@ -1,0 +1,47 @@
+<template>
+    <lightning-card title ="Input Inbound Logistics">
+        <div class="slds-box slds-box_xx-small slds-p-around_medium">
+            <!-- Search Input -->
+            
+
+            <!-- Country Buttons -->
+            <div class="button-container slds-align_absolute-center">
+                <lightning-button 
+                    label="China" 
+                    onclick={handleCountrySelect} 
+                    data-country="China" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Malaysia" 
+                    onclick={handleCountrySelect} 
+                    data-country="Malaysia" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Vietnam" 
+                    onclick={handleCountrySelect} 
+                    data-country="Vietnam" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <template if:true={filteredData.length}>
+            <lightning-datatable
+                key-field="Id"
+                data={filteredData}
+                columns={columns}
+                hide-checkbox-column
+                show-row-number-column
+                draft-values={draftValues}
+                onsave={handleSave}>
+            </lightning-datatable>
+        </template>
+        
+    </lightning-card>
+</template>

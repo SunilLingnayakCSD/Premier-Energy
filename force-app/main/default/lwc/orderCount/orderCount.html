@@ -1,0 +1,64 @@
+<template>
+   <lightning-layout horizontal-align="small" multiple-rows="true">
+      <lightning-layout-item padding="around-small" flexibility="auto">
+         <lightning-input 
+                           label="Summary From" 
+                           name="startdate" 
+                           value={startDate} 
+                           type="date"
+                           onchange={changeHandlerDate}>
+         </lightning-input>
+         
+         </lightning-layout-item>
+         
+
+         <lightning-layout-item padding="around-small" flexibility="auto">
+            <lightning-input
+                              label="Summary To"
+                              name="enddate"
+                              value={endDate}
+                              type="date"
+                              onchange={changeHandlerDate}
+                              >
+
+            </lightning-input>
+             
+         </lightning-layout-item>
+       
+      
+   </lightning-layout>
+
+   <div class="submainContainer">
+      <div>
+         <div class="subdiv1">
+            {orderCounts.total}
+         </div>
+         <p class="heading">TOTAL ORDERS</p>
+      </div>
+      <div>
+         <div class="subdiv2">
+            {orderCounts.closed}
+         </div>
+         <p class="heading">CLOSED ORDERS</p>
+      </div>
+      <div>
+         <div class="subdiv3">
+            {orderCounts.inprogress}
+         </div>
+         <p class="heading">IN PROGRESS</p>
+      </div>
+      <div>
+         <div class="subdiv4">
+            {orderCounts.intransit}
+         </div>
+         <p class="heading">IN TRANSIT</p>
+      </div>
+      <div>
+         <div class="subdiv5">
+            {orderCounts.cancelled}
+         </div>
+         <p class="heading">CANCELLED</p>
+      </div>
+   </div>
+
+</template>

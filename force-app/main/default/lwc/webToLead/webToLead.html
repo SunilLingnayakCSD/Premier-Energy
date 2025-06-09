@@ -1,0 +1,152 @@
+<template>
+    <div class="background-container">
+
+        <div class="form">
+            <div class="green-bar">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div><br>
+            <br>
+            <div class="content">
+                <div class="img contact-head g">
+                    <img src={belgaumlogo} height="250px" width="200px"/>
+                </div>
+                <p class="contact-head g">POWER YOUR FUTURE WITH SOLAR</p>
+                <p class="contact-desc">
+                    Fill in your details and take a first step towards a sustainable future.<br>
+                </p>
+            </div>
+            <p class="SectinHeading">
+                CUSTOMER INFORMATION:<br>
+            </p>
+            <div class="form-fields">
+                <!-- Two fields in one row -->
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="firstName">FIRST NAME*</label><br>
+                        <input type="text" name="firstName" value={firstName} onchange={LeadChangeVal} class="form-input firstName"/>
+                        <template if:true={firstNameError}>
+                            <span class="error-message">{firstNameError}</span>
+                        </template>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">LAST NAME*</label><br>
+                        <input type="text" name="lastName"  value={lastName} onchange={LeadChangeVal} class="form-input lastName" required />
+                        <template if:true={lastNameError}>
+                            <span class="error-message">{lastNameError}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="emailId">EMAIL*</label><br>
+                        <input type="email" name="emailId"  value={emailId} onchange={LeadChangeVal} class="form-input emailId Email"/>
+                        <template if:true={emailIdError}>
+                            <div class="error-message">{emailIdError}</div>
+                        </template>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNo">PHONE NUMBER*</label><br>
+                        <input type="text" name="phoneNo"  value={phoneNo} onchange={LeadChangeVal} pattern="[0-9]{10}" title="Please enter a valid phone number" class="form-input phoneNo Phone" required/>
+                        <template if:true={phoneNoError}>
+                            <div class="error-message">{phoneNoError}</div>
+                        </template>
+                    </div>
+                </div>
+
+
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="Country">COUNTRY*</label><br>
+
+                        <lightning-combobox name="country" value={selectedCountry} options={countryOptions}
+                            onchange={handleCountryChange}>
+                        </lightning-combobox>
+                        <template if:true={fieldErrors.selectedCountry}>
+                            <span class="error-message">{fieldErrors.selectedCountry}</span>
+                        </template>
+                    </div>
+
+                    <div class="form-group">
+                        <label  for="State">STATE*</label>
+                        <lightning-combobox name="state" value={selectedState} options={stateOptions}
+                            onchange={handleStateChange} disabled={isStateDisabled}>
+                        </lightning-combobox>
+                        <template if:true={fieldErrors.selectedState}>
+                            <span class="error-message">{fieldErrors.selectedState}</span>
+                        </template>
+                    </div>
+                </div>
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="City">CITY*</label><br>
+                        <input type="text" name="City" value={City} onchange={LeadChangeVal}  class="form-input"/>
+                        <template if:true={CityError}>
+                            <span class="error-message">{CityError}</span>
+                        </template>
+                    </div>
+                    <div class="form-group">
+                        <label for="PostalCode">PINCODE*</label><br>
+                        <input type="text" name="PostalCode"  value={PostalCode} onchange={LeadChangeVal} class="form-input lastName" required />
+                        <template if:true={PostalCodeError}>
+                            <span class="error-message">{PostalCodeError}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <p class="subSectinHeading">
+                    BUSINESS & PRODUCT INFORMATION:<br>
+                </p>
+
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="DCRNonDCR">DCR/NON-DCR</label><br>
+                        <select id="DCRNonDCR" name="DCRNonDCR" onchange={LeadChangeVal} >
+                        <option value="" disabled selected></option>
+                        <option value="DCR">DCR</option>
+                        <option value="Non DCR">Non DCR</option>
+                    </select>
+                        <template if:true={DCRNonDCRError}>
+                            <span class="error-message">{DCRNonDCRError}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="date">Delivery Due Date</label><br>
+                        <input type="Date" name="Date"  value={date} onchange={LeadChangeVal} class="form-input lastName"  />
+                        <template if:true={DeliverDateError}>
+                            <span class="error-message">{QuantityError}</span>
+                        </template> 
+                    </div>
+                    <div class="form-group">
+                        <label for="TotalWattageWp">TOTAL CAPACITY IN KILO WATT</label><br>
+                        <input type="text" name="TotalWattageWp"  value={TotalWattageWp} onchange={LeadChangeVal} class="form-input firstName"/>
+                        <template if:true={CapacityError}>
+                            <span class="error-message">{CapacityError}</span>
+                        </template>
+                    </div>
+                </div>
+                <div class="input-pair-row">
+                    <div class="form-group">
+                        <label for="company">COMPANY</label><br>
+                        <input type="text" name="company"  value={company} onchange={LeadChangeVal} class="form-input firstName"/>
+                        <!-- <template if:true={companyError}>
+                            <div class="error-message">{companyError}</div>
+                        </template> -->
+                    </div>
+                    <div class="form-group">
+                        <label for="MonthlyUnitsconsumption">MONTHLY UNITS CONSUMPTION</label><br>
+                        <input type="text" name="MonthlyUnitsconsumption"  value={MonthlyUnitsconsumption} onchange={LeadChangeVal} class="form-input lastName"  />
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <button class="clippy_button request-button" type="button" onclick={insertLeadAction}>Submit</button>
+            </div>
+        </div>
+    </div>
+</template>

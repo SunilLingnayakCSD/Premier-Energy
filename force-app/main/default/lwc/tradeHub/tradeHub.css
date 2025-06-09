@@ -1,0 +1,43 @@
+.header-row,
+.data-row {
+    display: flex;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.header-row {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    border-top: 1px solid #ccc;
+}
+
+.data-row:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.data-row:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.header-row div,
+.data-row div {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    word-break: break-word;
+}
+
+/* Optional: Section titles styling */
+h1 {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #2b2b2b;
+    /* border-bottom: 2px solid #ccc; */
+    padding-bottom: 5px;
+}
+
+.input{
+    width: 200px;
+    padding: 8px;
+}

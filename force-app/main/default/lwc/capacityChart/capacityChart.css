@@ -1,0 +1,37 @@
+.chart-container {
+    padding: 1rem;
+}
+
+.bar-container {
+    margin-bottom: 1rem;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.bar-wrapper {
+    display: flex;
+    height: 20px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.achieved-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.remaining-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.capacity-info {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #555;
+}

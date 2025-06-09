@@ -1,0 +1,36 @@
+<template>
+    <lightning-tabset onactive={handleTabChange}>
+        <!-- First Tab -->
+        <lightning-tab label="Finance Cost" name="tab1">
+            <div class="slds-p-around_medium">
+             <c-financialparameterstable></c-financialparameterstable>   
+                
+            </div>
+        </lightning-tab>
+        <lightning-tab label=" Cell Wattage" name="tab2">
+            <div class="slds-p-around_medium">
+                <!-- Content for Tab 2 -->
+               <c-cellwattage></c-cellwattage>
+            </div>
+        </lightning-tab>
+
+        <!-- Second Tab -->
+        <lightning-tab label="Pre- Approved EBITDA" name="tab2">
+            <div class="slds-p-around_medium">
+                <!-- Content for Tab 3 -->
+                <c-input-segment></c-input-segment>
+            </div>
+        </lightning-tab>
+
+        
+
+        <lightning-tab label=" AOP EBITDA" name="tab2">
+            <div class="slds-p-around_medium">
+                <!-- Content for Tab 4 -->
+               <c-aop-ebitda></c-aop-ebitda>
+            </div>
+        </lightning-tab>
+
+           
+    </lightning-tabset>
+</template>

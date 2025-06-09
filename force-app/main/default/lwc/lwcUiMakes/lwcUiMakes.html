@@ -1,0 +1,63 @@
+<template>
+    <lightning-card>
+        <div class="slds-box slds-box_xx-small slds-p-around_medium">
+            <!-- Search Input -->
+            <div class="slds-m-bottom_medium slds-p-around_medium"> 
+                <lightning-input 
+                    label="Raw Material Name" 
+                    value={searchValue}
+                    name="searchName" 
+                    onchange={changeHandler} 
+                    type="search"
+                    placeholder="Search Raw Material Names....">
+                </lightning-input>
+            </div>
+
+            <!-- Centered Compact Country Buttons -->
+            <div class="button-container slds-align_absolute-center">
+                <lightning-button 
+                    label="China" 
+                    onclick={handleButtonClick} 
+                    data-country="China" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button 
+                    label="India" 
+                    onclick={handleButtonClick} 
+                    data-country="India" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Malaysia" 
+                    onclick={handleButtonClick} 
+                    data-country="Malaysia" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Vietnam" 
+                    onclick={handleButtonClick} 
+                    data-country="Vietnam" 
+                    variant="success"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+            </div>
+        </div>
+
+        <!-- Data Table (Displays filtered data) -->
+        <template if:true={filteredData.length}>
+            <lightning-datatable
+                key-field="Id"
+                data={filteredData}
+                columns={columns}
+                hide-checkbox-column
+                show-row-number-column
+                draft-values={draftValues}
+                onsave={handleSave}>
+            </lightning-datatable>
+        </template>
+        
+    </lightning-card>
+</template>

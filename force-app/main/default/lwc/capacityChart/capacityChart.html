@@ -1,0 +1,23 @@
+<template>
+  <lightning-card title="Capacity Chart by Entity and Plant">
+    <template if:true={chartData.length}>
+      <div class="chart-container">
+        <template for:each={chartData} for:item="data">
+          <div key={data.key} class="bar-container">
+            <div class="label">{data.entity} - {data.plant}</div>
+            <div class="bar-wrapper">
+              <div class="achieved-bar" style={data.achievedStyle}></div>
+              <div class="remaining-bar" style={data.remainingStyle}></div>
+            </div>
+            <div class="capacity-info">
+              Achieved Capacity: {data.achieved} MWp | Annual Capacity: {data.target} MWp
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+    <template if:true={error}>
+      <div class="slds-text-color_error">{error}</div>
+    </template>
+  </lightning-card>
+</template>

@@ -1,0 +1,61 @@
+<template>
+    <lightning-card title="Raw Materials Configuration">
+        <div class="slds-m-around_medium">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered financial-table">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="slds-text-title_caps" scope="col">Raw Material</th>
+                        <th class="slds-text-title_caps" scope="col">UoM</th>
+                        <th class="slds-text-title_caps" scope="col">Qty (20 Ft)</th>
+                        <th class="slds-text-title_caps" scope="col">Qty (40 Ft)</th>
+                        <th class="slds-text-title_caps" scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={rawdata} for:item="material">
+                        <tr key={material.Id} class="data-row">
+                            <td role="gridcell">{material.Name}</td>
+                            <td>{material.UOM__c}</td>
+                            <td>
+                                <template if:true={material.isEdit}>
+                                    <lightning-input type="number" value={material.tempData.Qty_20_Ft__c} 
+                                        onchange={handle20FtChange} data-id={material.Id}></lightning-input>
+                                </template>
+                                <template if:false={material.isEdit}>
+                                    {material.Qty_20_Ft__c}
+                                </template>
+                            </td>
+                            <td>
+                                <template if:true={material.isEdit}>
+                                    <lightning-input type="number" value={material.tempData.Qty_40_Ft__c} 
+                                        onchange={handle40FtChange} data-id={material.Id}></lightning-input>
+                                </template>
+                                <template if:false={material.isEdit}>
+                                    {material.Qty_40_Ft__c}
+                                </template>
+                            </td>
+                            <td>
+                                <template if:true={material.isEdit}>
+                                    <lightning-button-icon icon-name="utility:save" 
+                                        alternative-text="Save" title="Save" 
+                                        onclick={handleSave} data-id={material.Id}>
+                                    </lightning-button-icon>
+                                    <lightning-button-icon icon-name="utility:close" 
+                                        alternative-text="Cancel" title="Cancel" 
+                                        onclick={handleCancel} data-id={material.Id}>
+                                    </lightning-button-icon>
+                                </template>
+                                <template if:false={material.isEdit}>
+                                    <lightning-button-icon icon-name="utility:edit" 
+                                        alternative-text="Edit" title="Edit" 
+                                        onclick={handleEdit} data-id={material.Id}>
+                                    </lightning-button-icon>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </lightning-card>
+</template>

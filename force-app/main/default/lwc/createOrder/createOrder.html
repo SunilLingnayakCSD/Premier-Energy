@@ -1,0 +1,334 @@
+<template>
+    <template if:true={acc}>
+    <div class="mainContainer">
+     <div class="submainContainer">
+     <div>
+        <p class="heading">OPEN ORDERS</p>
+        <div class="subdiv1">
+            {orderCounts.Closed}
+        </div>
+     </div>
+     <div >
+        <p class="heading">IN TRANSIT ORDERS</p>
+        <div class="subdiv2">
+            {orderCounts.InTransit}
+        </div>
+     </div>
+     <div>
+        <p class="heading">OPEN LEADS</p>
+        <div class="subdiv3">
+            {LeadCounts}
+        </div>
+     </div>
+    </div>
+    <div>
+    <div style="display: flex;border-top: 2px solid grey;margin-top: 30px;width: 700px;margin-bottom:40px;">
+        <h1 style="padding-top: 10px;margin-left: 260px;font-size: 28px;font-weight: bold;color: black;">ORDERS</h1>
+        <button class="btn" onclick={orderfunction}>CREATE NEW ORDER</button>
+    </div>
+    <div class="orders">
+    <div>
+        <h1 style="text-align: center;">OPEN ORDERS</h1>
+        <table class="orderTable">
+            <tr>
+                <th>SR NO.</th>
+                <th>NAME</th>
+                <th>DUE DATE</th>
+            </tr>
+            <template for:each={closedOrders} for:item="order" for:index="index">
+                <tr key={order.Id}>
+                    <td>{order.index}</td>
+                    <td>{order.orderNumber}</td>
+                    <td>{order.Date}</td>
+                </tr>
+            </template>
+        </table>
+    </div>
+        <!-- In Transit Orders Table -->
+        <div style="border-left: 1px solid grey;">
+            <h1 style="text-align: center;">IN TRANSIT ORDERS</h1>
+        <table class="orderTable">
+            <tr>
+                <th>SR NO.</th>
+                <th>NAME</th>
+                <th>CLOSED DATE</th>
+            </tr>
+            <template for:each={inTransitOrders} for:item="order" for:index="index">
+                <tr key={order.Id}>
+                    <td>{order.index}</td>
+                    <td>{order.orderNumber}</td>
+                    <td>{order.Date}</td>
+                </tr>
+            </template>
+        </table>
+    </div>
+    </div>
+    </div>
+    </div>
+    </template>
+      <template if:true={ismodalopen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container modelMainContainer">
+                 <button class="slds-button slds-button_icon slds-modal__close" onclick={closeModal}>
+                    <lightning-icon icon-name='utility:close' alternative-text='close' variant='error' size='small'
+                        title='close'></lightning-icon>
+                    <span class="slds-assistive-text">Cancel and close</span>
+                </button>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">ORDER DETAILS
+                    </h1>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <div class="containerModal">
+
+                        <template if:true={model}>
+                            <template if:true={acc}>
+                            <!-- <template for:each={accounts} for:item="account">  -->
+                              <div key={acc.Name} title={acc.Name}>
+                    
+                         <div style="display: flex; flex-direction:row;justify-content:space-between;">
+                          <h1 style="font-size:20px;margin-left:40%;">CREATE NEW ORDER</h1>
+                          <img src={logoPremier} height="70px" width="150px"/>
+                         </div>
+                         <div class="inputFields">
+                            <div style="display: flex;justify-content:space-around;">
+                                <div>
+                                    <lightning-input 
+                                      type="text"
+                                      label="PO NUMBER"
+                                      class="input1"
+                                      value={ponum}
+                                      onchange={handlePoNumChange}
+                                      required
+                                    ></lightning-input>
+                                    </div>
+                                <div>
+                                 <lightning-input 
+                                   type="date"
+                                   label="DATE"
+                                   class="input1"
+                                   value={today}
+                                 ></lightning-input>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex;justify-content:space-around;">
+                            <div >
+                            <lightning-combobox
+                            name="Bill To"
+                            label="Bill TO"
+                            value={selectedbillto}
+                            placeholder="Select CustomerCode"
+                            style="width: 400px;"
+                            options={billtoOptions}
+                            onchange={handleBilltoChange}
+                            required
+                           >
+                        </lightning-combobox>
+                        </div>
+                        <div>
+                            <lightning-combobox
+                            name="Bill To"
+                            label="Ship To"
+                            value={selectedshipto}
+                            placeholder="Select CustomerCode"
+                            style="width: 400px"
+                            options={shipToOptions}
+                            onchange={handleShiptoChange}
+                            required
+                           >
+                        </lightning-combobox>
+                            </div>
+                        </div>
+                        <div style="display: flex;justify-content:space-around;">
+                            <div>
+                            <lightning-textarea read-only="true" name="input1" label="BILLING ADDRESS" value={billingAddress} class="lightiningtext"></lightning-textarea>
+                    
+                        </div>
+                        <div>
+                            <lightning-textarea read-only="true" name="input1" label="SHIPPING ADDRESS" value={shippingAddress} class="lightiningtext"></lightning-textarea>
+                        </div>
+                        </div>  
+                         </div>
+                         <hr>
+                        <div>
+                            <div style="display: flex; font-weight: bold; background-color: #f0f0f0; padding: 10px;text-align:center;">
+                                <div style="flex: 1;">Product</div>
+                                <div style="flex: 1;">Quantity</div>
+                                <div style="flex: 1;">Wp</div>
+                                <div style="flex: 1;">Price</div>
+                                <div style="flex: 1;">Total</div>
+                                <div style="flex: 1;">Delete</div>
+                            </div>
+                    
+                            <template for:each={selectedRows} for:item="row">
+                                <div key={row.rowId} style="display: flex; padding: 10px; border-bottom: 1px solid #ccc;text-align:center;">
+                                    
+                                    <div style="flex: 1;display:flex;justify-content:center;">
+                                        <lightning-combobox
+                                            name="productSelect"
+                                            data-rowid={row.rowId}
+                                            value={row.selectedProductId}
+                                            placeholder="Select Product"
+                                            style="text-align:center;width:180px;"
+                                            options={productOptions}
+                                            onchange={handleProductChange}
+                                           >
+                                        </lightning-combobox>
+                                    </div>
+                    
+                                    <div style="flex: 1;display:flex;justify-content:center;">
+                                        <lightning-input
+                                            type="number"
+                                            name="quantity"
+                                            data-rowid={row.rowId}
+                                            value={row.quantity}
+                                            style="width: 70px;margin-right:30px;"
+                                            min="1"
+                                            onchange={handleQuantityChange}
+                                            >
+                                        </lightning-input>
+                                    </div>
+
+                                     <div style="flex: 1; padding-top: 10px;;padding-right: 20px">
+                                        <template if:true={row.selectedProductId}>
+                                             {row.Wp}
+                                        </template>
+                                    </div>
+                    
+                                    <div style="flex: 1; padding-top: 10px;;padding-right: 20px">
+                                        <template if:true={row.selectedProductId}>
+                                            ₹ {row.price}
+                                        </template>
+                                    </div>
+                    
+                                    <div style="flex: 1; padding-top: 10px;padding-right: 20px;">
+                                        <template if:true={row.selectedProductId}>
+                                            ₹ {row.total}
+                                        </template>
+                                    </div>
+                                    <div style="flex: 1; padding-top: 10px;">
+                                        <lightning-icon icon-name="utility:delete" size="small" style="cursor: pointer;" data-id={row.rowId} onclick={handleDeleteRow}
+                                        ></lightning-icon>
+                                    </div>
+                                </div>
+                            </template>
+                    
+                            <div class="slds-m-top_medium" style="margin-left: 10px;">
+                                <lightning-button
+                                    label="Add Another Product"
+                                    icon-name="utility:add"
+                                    onclick={handleAddRow}
+                                    >
+                                </lightning-button>
+                            </div>
+                        </div>
+                    
+                        <div>
+                            <div style="text-align: right;">
+                                <label>Total Quantity</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={QuantityTotal} readonly>
+                            </div> 
+                            <div style="text-align: right;">
+                                <label>TotalWp</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={wpTotal} readonly>
+                            </div>
+                            <div style="text-align: right;">
+                                <label>Total Capacity in MWp</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={MwpTotal} readonly>
+                            </div>
+                            <div style="text-align: right;">
+                                <label>TOTAL AMOUNT</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={grandTotal} readonly>
+                            </div>
+                            <div style="text-align: right;">
+                                <label>TDS @ 0.1% (LESS)</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={tdsAmount} readonly>
+                            </div>
+                            <div style="text-align: right;">
+                                <label>GST @ 12% (ADD)</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid;" value={gstAmount} readonly>
+                            </div>
+                            <div style="text-align: right;">
+                                <label>GRAND TOTAL</label>
+                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={finalPayable} readonly>
+                            </div>
+                        </div>
+                        <div>
+        
+                        </div>
+                    
+                        <hr>
+                        
+                        <div style="display: flex; flex-direction:row;justify-content:space-between;">
+                    <template if:true={metarecords}>
+                        <template for:each={metarecords} for:item="item">
+                        <div key={item.Id}>
+                            <h1>STANDARD TERMS AND CONDITIONS</h1>
+                            <p>{item.Term1__c}</p>
+                            <p>{item.Term2__c}</p>
+                            <p>{item.Term3__c}</p>
+                            <p>{item.Term4__c}</p>
+                        </div>
+                    </template>
+                    </template>
+                            <div>
+                                <lightning-input 
+                              type="text"
+                              label="GST IN"
+                              class="input"
+                              value={acc.account.Customer_GST_Number__c}
+                            ></lightning-input>
+                            </div>
+                        </div>
+                    
+                        <div >
+                            <div style="display: flex; justify-content:space-between;flex-direction:row; text-align:left;">
+                                <div class="slds-m-top_medium">
+                                    <label class="slds-form-element__label" for="upload-file"><span class="required">*</span>
+                                                            Attachment
+                                                        </label>
+                                    <input type="file" 
+                                           id="upload-file" 
+                                           class="slds-input" 
+                                           accept="image/*"
+                                           onchange={handleFileUpload} 
+                                           required
+                                           />
+                                </div>
+                            
+        
+                                <lightning-input class="input1" type="text" label="ACCOUNT DETAILS" value={acc.account.Name}></lightning-input>
+                            </div>
+                        </div>
+                        </div>
+                    
+                        <!-- </template> -->
+                       </template>
+                       <div style="text-align:center;">
+                        <button style="width: 200px;padding:10px;background-color:blue;font-weight:bold;color:white;font-size:16px;border:none;" onclick={handleSubmit}>
+                            SUBMIT
+                        </button>
+                       </div>
+                        </template>
+                       
+                      
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </template>     
+    <template if:true={warnings}>
+    <div class="slds-notice slds-notice_warning slds-m-top_medium">
+        <div class="slds-notice__content">
+            <h2 class="slds-text-heading_small">Product Combination Warnings</h2>
+            <template for:each={warnings} for:item="warning">
+                <p key={warning} class="slds-m-top_x-small">{warning}</p>
+            </template>
+        </div>
+    </div>
+</template>
+</template>

@@ -1,0 +1,100 @@
+<template>
+    <lightning-card title="Input Inbound Logistics" class="glass-container">
+        <div class="slds-p-around_medium">
+            <div class="button-container slds-align_absolute-center slds-m-bottom_medium">
+                <lightning-button
+                    label="China"
+                    variant={chinaButtonVariant}
+                    onclick={handleCountrySelect}
+                    data-country="China"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button
+                    label="Malaysia"
+                    variant={malaysiaButtonVariant}
+                    onclick={handleCountrySelect}
+                    data-country="Malaysia"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+                <lightning-button
+                    label="Vietnam"
+                    variant={vietnamButtonVariant}
+                    onclick={handleCountrySelect}
+                    data-country="Vietnam"
+                    class="slds-m-horizontal_xx-small">
+                </lightning-button>
+            </div>
+
+            <!-- Table -->
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <template for:each={columns} for:item="col">
+                            <th key={col.fieldName} class="slds-text-heading_small">{col.label}</th>
+                        </template>
+                        <th class="slds-text-heading_small">EDIT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={preparedRows} for:item="row" for:index="index">
+                        <tr key={row.Id} class={row.rowClass}>
+                            <template for:each={row.cells} for:item="cell">
+                                <td
+                                    key={cell.fieldName}
+                                    class={cell.class}
+                                    title={cell.title}
+                                >
+                                    <template if:true={row.isEditing}>
+                                        <template if:false={cell.isRawMaterialName}>
+                                            <lightning-input
+                                                value={cell.value}
+                                                data-row-id={row.Id}
+                                                data-field={cell.fieldName}
+                                                onchange={handleCellChange}
+                                                class="cell-input"
+                                            ></lightning-input>
+                                        </template>
+                                        <template if:true={cell.isRawMaterialName}>
+                                            {cell.value}
+                                        </template>
+                                    </template>
+                                    <template if:false={row.isEditing}>
+                                        {cell.value}
+                                    </template>
+                                </td>
+                            </template>
+                            <td>
+                                <template if:true={row.isEditing}>
+                                    <lightning-button-icon 
+                                        icon-name="utility:save" 
+                                        alternative-text="Save" 
+                                        title="Save"
+                                        class="slds-m-right_x-small"
+                                        onclick={handleSaveRow}
+                                        data-row-id={row.Id}>
+                                    </lightning-button-icon>
+                                    <lightning-button-icon 
+                                        icon-name="utility:close" 
+                                        alternative-text="Cancel" 
+                                        title="Cancel"
+                                        onclick={handleCancelEdit}
+                                        data-row-id={row.Id}>
+                                    </lightning-button-icon>
+                                </template>
+                                <template if:false={row.isEditing}>
+                                    <lightning-button-icon 
+                                        icon-name="utility:edit" 
+                                        alternative-text="Edit" 
+                                        title="Edit"
+                                        onclick={handleEditRow}
+                                        data-row-id={row.Id}>
+                                    </lightning-button-icon>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,46 @@
+.opportunity-card-lost,
+.opportunity-card-won {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1rem;
+}
+
+.opportunity-card .value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.opportunity-card .detail {
+    font-size: 0.9rem;
+    color: #444;
+    margin-bottom: 0.25rem;
+}
+
+.opportunity-card .label {
+    font-weight: 600;
+    color: #666;
+    margin-right: 4px;
+}
+.opp-link {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #1e88e5;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+}
+
+.opp-link:hover {
+    text-decoration: underline;
+}
+.opportunity-card-won {
+    /* background-color: #eafaf1;  */
+    border-left: 6px solid #2ecc71;
+}
+.opportunity-card-lost {
+    /* background-color: #fdecea;  */
+    border-left: 6px solid #e74c3c;
+}

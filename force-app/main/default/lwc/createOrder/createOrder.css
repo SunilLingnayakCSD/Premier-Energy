@@ -1,0 +1,165 @@
+.submainContainer{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 700px;
+}
+h1{
+    font-weight: bold;
+    font-size: 16px;
+}
+.subdiv1{
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: #0070d2;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.subdiv2{
+    border: none;
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: black;
+    text-align: center;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+
+}
+.subdiv3{
+    height: 100px;
+    width: 100px;
+    font-size: 36px;
+    font-weight: bold;
+    background-color: green;
+    text-align: center;
+    color: white;
+    padding: 15px;
+     box-shadow: 0 4px 6px rgba(0, 0.4, 0.4, 0.5);
+    transition: transform 0.3s ease;
+}
+.heading{
+    text-align: center;
+    
+}
+.orders{
+    display: flex;
+    justify-content: space-between;
+    width: 700px;
+    
+}
+.btn{
+    position: relative;
+    left: 80px;
+    color: white;
+    background-color: blue;
+    height: 28px;
+    width: 120px;
+    border: none;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 10px;
+}
+
+.lightiningtext{
+    width: 400px;
+}
+.input{
+    width: 400px;
+}
+.input1{
+    width: 400px;
+    /* margin-left: 110px; */
+}
+
+.product-group {
+    border-bottom: 1px solid #dddbda;
+    padding-bottom: 1rem;
+}
+
+.product-row {
+    align-items: flex-end;
+}
+
+.group-total lightning-input, .grand-total lightning-input {
+    --lwc-formLabelFontWeight: bold;
+    --lwc-inputStaticFontWeight: bold;
+}
+
+.balance-check {
+    font-weight: bold;
+    color: #080707;
+}
+
+/* Basic table styling */
+table.orderTable {
+    width: 100%;     
+    margin: 10px auto;    
+    border-collapse: collapse; 
+}
+
+/* Table headers */
+table.orderTable th {
+    padding: 12px 20px;
+    text-align: left;       
+    /* border-bottom: 2px solid #ddd;   */
+}
+
+/* Table data */
+table.orderTable td {
+    padding: 10px 20px;   
+    /* border-bottom: 1px solid #ddd;  */
+}
+
+/* Styling for the table columns with space between */
+th, td {
+    width: 33%;  
+    /* font-family: 'Source Sans Pro'; */
+    font-size:12px ;
+}
+.total{
+    margin-right: 10px;
+}
+.c_container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+
+}
+.c_container div{ 
+    width: 300px;
+    padding: 3px;
+}
+.modelMainContainer{
+    max-width: 100%;
+    width: 90%;
+    
+  } 
+  .slds-modal__container{
+     width: 80%;
+     max-width: 100%;
+  }
+ 
+   
+  
+
+/* Optional: Responsive styling for smaller screens */
+@media screen and (max-width: 768px) {
+    table.orderTable {
+        width: 100%; 
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 14px;
+    }
+}

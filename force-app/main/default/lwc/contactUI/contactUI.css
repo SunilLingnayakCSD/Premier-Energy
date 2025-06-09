@@ -1,0 +1,120 @@
+/* Import Adobe Garamond Pro font */
+@font-face {
+    font-family: 'Adobe Garamond Pro';
+    src: url('/resource/AdobeGaramondPro/AdobeGaramondPro-Regular.woff2') format('woff2'),
+         url('/resource/AdobeGaramondPro/AdobeGaramondPro-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Card Container */
+.card-container {
+    background: linear-gradient(135deg, #0F6AB0, #62B847);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+    width: 100%;
+    font-family: 'Adobe Garamond Pro', Arial, sans-serif;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: white;  /* Ensures all text inside the card is white */
+}
+
+.info-label, .info-value {
+    font-size: 16px; /* Adjust as needed */
+    font-weight: bold;
+}
+
+
+/* Profile Header */
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    justify-content: flex-start;
+}
+
+/* Image Styling */
+.profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Profile Info Section */
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Customer Name */
+.name {
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Profile Completeness Section */
+.profile-completeness {
+    margin-top: 10px;
+}
+
+.section-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    display: inline-block;
+}
+
+.profile-completeness-text {
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Details Section (Below Profile Completeness) */
+.details-container {
+    margin-top: 15px;
+}
+
+/* Customer Info Styling */
+.details {
+    margin-top: 10px;
+    color: white;
+}
+
+.profile-completeness-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    text-decoration: underline;  /* Apply underline only to the percentage */
+}
+
+/* Info Items */
+.info-item {
+    font-size: 14px;
+    margin: 5px 0;
+    color: white;
+}
+
+/* Info Labels */
+.info-label {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white;
+}
+
+.label, .field-value {
+    font-size: 16px; /* Adjust as needed */
+    font-weight: bold;
+}
+
+/* Adjusting the Progress Bar Colors based on Profile Completion */
+.progress.low { background-color: red !important; }
+.progress.medium { background-color: orange !important; }
+.progress.high { background-color: green !important; }

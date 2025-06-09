@@ -1,0 +1,90 @@
+<!-- marginCalculator.html -->
+<template>
+    <!-- <lightning-card title="Margin Calculator" icon-name="standard:account">
+        <div class="slds-p-around_medium">
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-combobox
+                        name="segment"
+                        label="Segment"
+                        value={selectedSegment}
+                        options={segmentOptions}
+                        onchange={handleSegmentChange}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-combobox
+                        name="marginType"
+                        label="Margin Type"
+                        value={selectedMarginType}
+                        options={marginTypeOptions}
+                        onchange={handleMarginTypeChange}>
+                    </lightning-combobox>
+                </div>
+            </div>
+
+            <template if:true={showResults}>
+                <div class="slds-box slds-m-top_medium">
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">
+                        Margin for {selectedSegment} ({selectedMarginType})
+                    </h3>
+                    <p class="slds-text-heading_medium">
+                        Margin Percentage: <strong>{marginValue}%</strong>
+                    </p>
+                </div>
+            </template>
+        </div>
+    </lightning-card> -->
+
+    <!-- productSelector.html -->
+
+    <!-- productSelector.html -->
+
+    
+    <lightning-card title="Product Configuration" icon-name="standard:product">
+        <div class="slds-p-around_medium">
+            <lightning-layout horizontal-align="spread" multiple-rows>
+                <!-- Type Selection -->
+                <lightning-layout-item padding="around-small" size="4">
+                    <lightning-combobox
+                        name="type"
+                        label="Select Type"
+                        value={selectedType}
+                        placeholder="Select Type"
+                        options={typeOptions}
+                        onchange={handleTypeChange}>
+                    </lightning-combobox>
+                </lightning-layout-item>
+
+                <!-- Product Selection -->
+                <lightning-layout-item padding="around-small" size="4">
+                    <lightning-combobox
+                        name="product"
+                        label="Product Details"
+                        value={selectedProduct}
+                        placeholder="Select Product"
+                        options={filteredProducts}
+                        onchange={handleProductChange}
+                        disabled={isTypeNotSelected}>
+                    </lightning-combobox>
+                </lightning-layout-item>
+
+                <!-- Wattage Selection -->
+                <lightning-layout-item padding="around-small" size="4">
+                    <lightning-combobox
+                        name="wattage"
+                        label="Wattage"
+                        value={selectedWattage}
+                        placeholder="Select Wattage"
+                        options={filteredWattages}
+                        disabled={isProductNotSelected}>
+                    </lightning-combobox>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+    </lightning-card>
+
+
+
+
+</template>

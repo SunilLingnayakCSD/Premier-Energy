@@ -1,0 +1,86 @@
+<!-- inputSegment.html -->
+<template>
+    <div class="main slds-m-around_medium">
+        <template if:true={segments}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="slds-text-title_caps">Pre- approved EBITDA Segment</th>
+                        <th class="slds-text-title_caps">DCR (%)</th>
+                        <th class="slds-text-title_caps">NDCR (%)</th>
+                        <th class="slds-text-title_caps">edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={segments} for:item="segment">
+                        <tr key={segment.developerName} class="slds-hint-parent">
+                            <td>{segment.masterLabel}</td>
+                            
+                            <td>
+                                <template if:true={segment.isEditing}>
+                                    <lightning-input type="number" 
+                                        value={segment.dcr} 
+                                        step="0.01"
+                                        formatter="percent"
+                                        data-id={segment.developerName}
+                                        data-field="dcr"
+                                        onchange={handleValueChange}>
+                                    </lightning-input>
+                                </template>
+                                <template if:false={segment.isEditing}>
+                                    {segment.dcr}%
+                                </template>
+                            </td>
+                            
+                            <td>
+                                <template if:true={segment.isEditing}>
+                                    <lightning-input type="number" 
+                                        value={segment.ndcr} 
+                                        step="0.01"
+                                        formatter="percent"
+                                        data-id={segment.developerName}
+                                        data-field="ndcr"
+                                        onchange={handleValueChange}>
+                                    </lightning-input>
+                                </template>
+                                <template if:false={segment.isEditing}>
+                                    {segment.ndcr}%
+                                </template>
+                            </td>
+                            
+                            <td>
+                                <div class="slds-grid slds-grid_align-spread">
+                                    <template if:true={segment.isEditing}>
+                                        <lightning-button-icon
+                                            icon-name="utility:save"
+                                            variant="border-filled"
+                                            alternative-text="Save"
+                                            data-id={segment.developerName}
+                                            onclick={handleSave}>
+                                        </lightning-button-icon>
+                                        <lightning-button-icon
+                                            icon-name="utility:close"
+                                            variant="border-filled"
+                                            alternative-text="Cancel"
+                                            data-id={segment.developerName}
+                                            onclick={handleCancel}>
+                                        </lightning-button-icon>
+                                    </template>
+                                    <template if:false={segment.isEditing}>
+                                        <lightning-button-icon
+                                            icon-name="utility:edit"
+                                            variant="border-filled"
+                                            alternative-text="Edit"
+                                            data-id={segment.developerName}
+                                            onclick={handleEdit}>
+                                        </lightning-button-icon>
+                                    </template>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+    </div>
+</template>

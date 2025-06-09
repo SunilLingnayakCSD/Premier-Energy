@@ -1,0 +1,133 @@
+<template>
+
+    <div class="slds-grid slds-gutters slds-m-bottom_medium">
+        <div class="slds-col slds-size_1-of-2">
+            <lightning-combobox name="country" label="Country Source" value={countrySource} placeholder="Select Country"
+                options={countryOptions} onchange={handleCountryChange} disabled={isDisabled}></lightning-combobox>
+
+        </div>
+
+        <div class="slds-col slds-size_1-of-2">
+            <lightning-combobox name="pricing" label="Pricing Type" value={pricingType} placeholder="Select Pricing"
+                options={pricingOptions} onchange={handlePricingChange} disabled={isDisabled}></lightning-combobox>
+
+        </div>
+
+    </div>
+
+
+    <template if:true={rawMaterialData}>
+        <div class="finished-good-container slds-m-bottom_medium">
+            <div class="finished-good-details">
+                <div class="finished-good-title">
+                    <strong>Pricing Component:</strong> {pricingType}
+                </div>
+                <div class="finished-good-quantity">
+                    <strong>Country:</strong> {countrySource}
+                </div>
+            </div>
+        </div>
+
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered raw-materials-table">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <div class="slds-truncate">Raw Material Name</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">UOM</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Net BoQ</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Raw Cost (USD)</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Raw Cost (INR)</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Freight Module(INR)</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Insurance INR %</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Duty/Module (INR)</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">DDP Cost/Module(INR)</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">INR/Wp</div>
+                    </th>
+                    <th scope="col">
+                        <div class="slds-truncate">Cents/Wp</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={formattedData} for:item="material">
+                    <tr key={material.id}>
+                        <td data-label="Raw Material Name"> <template if:true={material.isVariable}>
+                                <lightning-combobox name={material.id} data-id={material.id}
+                                    value={material.selectedVariantId} options={material.variantOptions}
+                                    onchange={handleVariantChange}>
+                                </lightning-combobox>
+                            </template>
+                            <template if:false={material.isVariable}>
+                                {material.rawMaterialName}
+                            </template>
+                        </td>
+                        <td data-label="UOM">{material.uom}</td>
+                        <td data-label="Net BoQ">{material.requiredQuantityPerUnit}</td>
+                        <td data-label="Raw Cost (USD)">{material.formattedRawCostUSD}</td>
+                        <td data-label="Raw Cost (INR)">{material.formattedRawCostINR}</td>
+                        <td data-label="Freight Module(INR)">{material.formattedLogistics}</td>
+                        <td data-label="Insurance INR %">{material.formattedInsurance}</td>
+                        <td data-label="Duty/Module (INR)">{material.formattedDuty}</td>
+                        <td data-label="DDP Cost/Module(INR)">{material.formattedDdp}</td>
+                        <td data-label="INR/Wp">{material.formattedInrWp}</td>
+                        <td data-label="Cents/Wp">{material.formattedCentsDp}</td>
+                    </tr>
+                </template>
+                <tr class="slds-text-title_bold">
+                    <td>Total RM Cost</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{totalInrWp}</td>
+                    <td>{totalCentWp}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered raw-materials-table">
+            <thead>
+                <tr>
+                    <th>Particulars</th>
+                    <th>INR/Wp</th>
+                    <th>Cents/Wp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={costRows} for:item="row">
+                    <tr key={row.label}>
+                        <td>{row.label}</td>
+                        <td>{row.col2}</td>
+                        <td>{row.col3}</td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </template>
+    <template if:false={rawMaterialData}>
+        <p>No raw material data available.</p>
+    </template>
+
+</template>

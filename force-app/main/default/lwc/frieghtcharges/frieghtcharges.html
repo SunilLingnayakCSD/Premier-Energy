@@ -1,0 +1,123 @@
+<!-- freightChargesEditor.html -->
+<template>
+    <lightning-card title="Freight Charges Configuration">
+        <div class="slds-m-around_medium" if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading"></lightning-spinner>
+        </div>
+        <div class="slds-m-around_medium" if:false={isLoading}>
+            <!-- Sea Freight Section -->
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                <thead>
+                    <tr class="section-header">
+                        <th colspan="5">Sea Freight (USD)</th>
+                    </tr>
+                    <tr class="slds-text-title_caps">
+                        <th>Container Size</th>
+                        <th>China</th>
+                        <th>Vietnam</th>
+                        <th>Malaysia</th>
+                        <th>EDIT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={seaFreightData} for:item="item">
+                        <tr key={item.key}>
+                            <td>{item.containerSize}</td>
+                            <td class="number-align">
+                                <template if:true={item.isEdit}>
+                                    <lightning-input type="number" value={item.tempValues.China}
+                                           data-key={item.key} data-country="China" 
+                                           onchange={handleValueChange}></lightning-input>
+                                </template>
+                                <template if:false={item.isEdit}>
+                                    {item.formattedValues.China}
+                                </template>
+                            </td>
+                            <td class="number-align">
+                                <template if:true={item.isEdit}>
+                                    <lightning-input type="number" value={item.tempValues.Vietnam}
+                                           data-key={item.key} data-country="Vietnam" 
+                                           onchange={handleValueChange}></lightning-input>
+                                </template>
+                                <template if:false={item.isEdit}>
+                                    {item.formattedValues.Vietnam}
+                                </template>
+                            </td>
+                            <td class="number-align">
+                                <template if:true={item.isEdit}>
+                                    <lightning-input type="number" value={item.tempValues.Malaysia}
+                                           data-key={item.key} data-country="Malaysia" 
+                                           onchange={handleValueChange}></lightning-input>
+                                </template>
+                                <template if:false={item.isEdit}>
+                                    {item.formattedValues.Malaysia}
+                                </template>
+                            </td>
+                            <td>
+                                <template if:true={item.isEdit}>
+                                    <lightning-button-icon icon-name="utility:save" 
+                                           class="slds-m-left_x-small" alternative-text="Save"
+                                           onclick={handleSave} data-key={item.key}></lightning-button-icon>
+                                    <lightning-button-icon icon-name="utility:close" 
+                                           class="slds-m-left_x-small" alternative-text="Cancel"
+                                           onclick={handleCancel} data-key={item.key}></lightning-button-icon>
+                                </template>
+                                <template if:false={item.isEdit}>
+                                    <lightning-button-icon icon-name="utility:edit" 
+                                           class="slds-m-left_x-small" alternative-text="Edit"
+                                           onclick={handleEdit} data-key={item.key}></lightning-button-icon>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <!-- Inland Transport Section -->
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-m-top_medium">
+                <thead>
+                    <tr class="section-header">
+                        <th colspan="3">Inland Transport from Port to Factory (INR)</th>
+                    </tr>
+                    <tr class="slds-text-title_caps">
+                        <th>Container Size</th>
+                        <th>India</th>
+                        <th>EDIT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={inlandTransportData} for:item="item">
+                        <tr key={item.key}>
+                            <td>{item.containerSize}</td>
+                            <td class="number-align">
+                                <template if:true={item.isEdit}>
+                                    <lightning-input type="number" value={item.tempValues.China}
+                                           data-key={item.key} data-country="China" 
+                                           onchange={handleValueChange}></lightning-input>
+                                </template>
+                                <template if:false={item.isEdit}>
+                                    {item.formattedValues.China}
+                                </template>
+                            </td>
+                            <td> 
+                                <template if:true={item.isEdit}>
+                                    <lightning-button-icon icon-name="utility:save" 
+                                           class="slds-m-left_x-small" alternative-text="Save"
+                                           onclick={handleSave} data-key={item.key}></lightning-button-icon>
+                                    <lightning-button-icon icon-name="utility:close" 
+                                           class="slds-m-left_x-small" alternative-text="Cancel"
+                                           onclick={handleCancel} data-key={item.key}></lightning-button-icon>
+                                </template>
+                                <template if:false={item.isEdit}>
+                                    <lightning-button-icon icon-name="utility:edit" 
+                                           class="slds-m-left_x-small" alternative-text="Edit"
+                                           onclick={handleEdit} data-key={item.key}></lightning-button-icon>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </lightning-card>
+</template>

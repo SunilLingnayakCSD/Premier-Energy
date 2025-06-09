@@ -1,0 +1,58 @@
+<template>
+    <lightning-card title="Update Raw Materials: Price Comparison">
+        <template if:true={rawMaterials}>
+            <table class="inventory">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Current Raw Material </th>
+                        <th>Substitute Raw Material</th>
+                        <th>UOM</th>
+                        <th>Quantity/Module</th>
+                        <th>Cost</th>
+                        <!--th>Low Cost</th-->
+                        <th>Change Raw Material</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={rawMaterials} for:item="rawMaterial">
+                        <tr key={rawMaterial.id}>
+                            <td>
+                                <!-- Radio button to select raw material -->
+                                <lightning-input type="radio" name="selectRawMaterial" value={rawMaterial.id} onchange={handleRadioChange}></lightning-input>
+                            </td>
+                            <td>{rawMaterial.name}</td>
+                            <td>  <!-- Dropdown to select substitute raw material -->
+                                <lightning-combobox 
+                                    name="substituteRawMaterial" 
+                                    label="Select Substitute"
+                                    value={rawMaterial.selectedSubstituteId}
+                                    options={substituteOptions}
+                                    onchange={handleSubstituteChange}>
+                                </lightning-combobox>
+                                </td>
+                            <td>{rawMaterial.uom}</td>
+                            <td>{rawMaterial.quantity}</td>
+                            <td>{rawMaterial.cost}</td>
+                            <!--td>{rawMaterial.lowCost}</td-->
+                            <td>
+
+                   <!-- Update Button to trigger the update to parent component -->     
+                         <button class="custom-button" 
+                         data-id={rawMaterial.id} 
+                         onclick={handleUpdateClick}>Update </button>
+                    
+         
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+            
+         </template>
+        
+        <template if:true={error}>
+            <div class="slds-text-color_error">{error}</div>
+        </template>
+    </lightning-card>
+</template>

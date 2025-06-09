@@ -1,0 +1,283 @@
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    
+}
+
+.finished-good-container {
+    background-color: #eaf4fb;
+    border: 1px solid #d9e4ea; 
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.finished-good-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;  
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.finished-good-title,
+.finished-good-quantity {
+    color: #0070d2;
+}
+
+.raw-materials-table {
+     width: 100%;
+    background-color: #ffffff;
+    border-collapse: collapse;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+           
+}
+
+.raw-materials-table th {
+    background-color: #dfe9f2;
+    border-bottom: 2px solid #0070d2;
+    color: #2c3e50;
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+
+
+    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.raw-materials-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    color: #595959;
+
+
+    white-space: nowrap;
+  /* overflow: hidden; */
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.raw-materials-table tbody tr:hover {
+    background-color: #f3f7fa;
+}
+
+.slds-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+} 
+.raw-materials-table th:nth-last-child(2),
+.raw-materials-table td:nth-last-child(2),
+.raw-materials-table th:last-child,
+.raw-materials-table td:last-child {
+  width: 120px; 
+  text-align: left; 
+ 
+  
+}
+
+/* Add this CSS */
+.raw-materials-table tr:last-child td {
+    background-color: lightblue !important;
+    color: blue !important;
+    font-weight: bold !important;
+    font-size: large;
+}
+
+/* Specific to the summary table */
+table.raw-materials-table:last-of-type tr:last-child td {
+    background-color: lightblue !important;
+    color: blue !important;
+    font-weight: bold !important;
+}
+
+
+
+/* ADD THESE CSS RULES 
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    
+}
+ 
+.raw-materials-table {
+  table-layout: fixed; 
+  
+}
+
+.raw-materials-table th,
+.raw-materials-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  
+  text-overflow: ellipsis;
+  vertical-align: top; 
+  
+}
+
+Specific alignment for INR/Cents columns 
+.raw-materials-table th:nth-last-child(2),
+.raw-materials-table td:nth-last-child(2),
+.raw-materials-table th:last-child,
+.raw-materials-table td:last-child {
+  width: 120px; 
+  text-align: right; 
+  
+}
+
+ Keep existing CSS below - NO CHANGES TO YOUR ORIGINAL STYLES 
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    
+}
+
+.finished-good-container {
+    background-color: #eaf4fb;
+    border: 1px solid #d9e4ea; 
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    width: 100%;
+   
+}
+
+.finished-good-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;  
+    color: #2c3e50;
+    font-weight: 500;
+    
+}
+
+.finished-good-title,
+.finished-good-quantity {
+    color: #0070d2;
+    
+}
+
+.raw-materials-table {
+    width: 100%;
+    background-color: #ffffff;
+    border-collapse: collapse;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+   
+}
+
+.raw-materials-table th {
+    background-color: #dfe9f2;
+    border-bottom: 2px solid #0070d2;
+    color: #2c3e50;
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+    
+}
+
+.raw-materials-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    color: #595959;
+     
+    
+}
+
+.raw-materials-table tbody tr:hover {
+    background-color: #f3f7fa;
+}
+
+.slds-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+   
+}
+*/
+.summary-view {
+  padding: 1.5rem;
+  background-color: #f4f6f9;
+  border-radius: 0.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center; /* Center all text inside the summary-view */
+}
+
+.summary-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 280px;
+}
+
+.slds-card {
+  border: 1px solid #d8dde6;
+  border-radius: 0.25rem;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.slds-card__header {
+  border-bottom: 1px solid #d8dde6;
+  padding: 0.75rem 1rem;
+  background-color: #f3f6fb;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  text-align: center;
+}
+
+.slds-card__header h4 {
+  margin: 0;
+  font-weight: 600;
+  color: #16325c;
+}
+
+.slds-card__body {
+  padding: 1rem;
+  text-align: center;
+}
+
+.summary-list {
+  display: inline-block; /* Keeps dl centered */
+  text-align: left;      /* Align text within dt/dd left for readability */
+}
+
+.summary-list dt {
+  font-weight: 900;
+  color: #0070d2;
+  margin-bottom: 0.25rem;
+}
+
+.summary-list dd {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #333333;
+}
+
+.updatebutton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* or a fixed height like 200px */
+}

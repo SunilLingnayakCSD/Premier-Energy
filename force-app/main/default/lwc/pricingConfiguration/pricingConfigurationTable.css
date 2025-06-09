@@ -1,0 +1,25 @@
+.financial-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.financial-table th {
+    background-color: #f3f6f9;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #dddbda;
+}
+
+.financial-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dddbda;
+}
+
+.financial-table lightning-button-icon {
+    margin-left: 5px;
+}
+
+.financial-table lightning-input {
+    --lwc-inputStaticFontSize: 0.875rem;
+    --lwc-inputStaticColor: #080707;
+}

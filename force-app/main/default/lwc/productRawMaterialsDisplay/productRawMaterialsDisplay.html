@@ -1,0 +1,38 @@
+<template>
+    <!-- <lightning-card title="Raw Materials for Selected Product"> -->
+        <template if:true={rawMaterials}>
+            <table class="inventory">
+               
+                  <tr style="background-color: #083d82; color: white;">
+                        <th>Raw Material Name</th>
+                        <th>UOM</th>
+                        <th>Quantity/Module</th>
+                        <th>Price</th>
+                    </tr>
+                
+                <tbody>
+                    <template for:each={rawMaterials} for:item="record">
+                        <tr key={record.id}>
+                            <td>{record.Name}</td>
+                            <td>{record.UOM}</td>
+                            <td>{record.Quantity}</td>
+                            <td>{record.Price}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+        <template if:true={error}>
+            <div class="slds-text-color_error">{error}</div>
+        </template>
+
+       <!-- Include the child component here 
+        <c-raw-materials-cost-display
+            record-id={recordId} 
+            onrawmaterialupdate={handleRawMaterialUpdate}
+            class="custom-spacing">
+        </c-raw-materials-cost-display>   
+     </lightning-card> -->
+
+  
+</template>

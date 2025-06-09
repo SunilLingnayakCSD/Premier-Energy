@@ -1,0 +1,62 @@
+<template>
+    <div class="main slds-m-around_medium">
+        <template if:true={wattageData}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered financial-table">
+                <thead>
+                    <tr>
+                        <th>Cell Wattage</th>
+                        <th>Wp</th>
+                        <th>EDIT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={rows} for:item="row">
+                        <tr key={row.id}>
+                            <td>{row.label}</td>
+                            <td>
+                                <template if:true={row.isEditing}>
+                                    <lightning-input 
+                                        type="number"
+                                        step="0.01"
+                                        value={row.value}
+                                        data-id={row.id}
+                                        onchange={handleValueChange}>
+                                    </lightning-input>
+                                </template>
+                                <template if:false={row.isEditing}>
+                                    {row.value}
+                                </template>
+                            </td>
+                            <td>
+                                <template if:true={row.isEditing}>
+                                    <lightning-button-icon icon-name="utility:save"
+                                        alternative-text="Save"
+                                        data-id={row.id}
+                                        onclick={handleSave}
+                                        class="slds-m-left_x-small">
+                                    </lightning-button-icon>
+                                    <lightning-button-icon icon-name="utility:close"
+                                        alternative-text="Cancel"
+                                        data-id={row.id}
+                                        onclick={handleCancel}
+                                        variant="inverse"
+                                        class="slds-m-left_x-small">
+                                    </lightning-button-icon>
+                                </template>
+                                <template if:false={row.isEditing}>
+                                    <lightning-button-icon icon-name="utility:edit"
+                                        alternative-text="Edit"
+                                        data-id={row.id}
+                                        onclick={handleEdit}
+                                        
+                                        class="slds-m-left_x-small">
+                                    </lightning-button-icon>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+    </div>
+</template>

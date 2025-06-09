@@ -1,0 +1,27 @@
+<template>
+    <lightning-tabset onactive={handleTabChange}>
+        <!-- First Tab -->
+        <lightning-tab label="RAW MATERIAL CONFIG" name="tab1">
+            <div class="slds-p-around_medium">
+             <c-lwc-ui-makes></c-lwc-ui-makes>   
+                
+            </div>
+        </lightning-tab>
+
+        <lightning-tab label="PACKAGING CONFIGURATION" name="tab">
+            <div class="slds-p-around_medium">
+             <c-pricing-configuration></c-pricing-configuration>   
+                
+            </div>
+        </lightning-tab>
+
+        <!-- <lightning-tab label="FRIEGHT CHARGES" name="tab">
+            <div class="slds-p-around_medium">
+             <c-frieghtcharges></c-frieghtcharges>   
+                
+            </div>
+        </lightning-tab> -->
+
+        
+    </lightning-tabset>
+</template>

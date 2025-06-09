@@ -1,0 +1,60 @@
+<template>
+   
+        <lightning-layout horizontal-align="small" multiple-rows="true">
+            <lightning-layout-item padding="around-small" flexibility="auto">
+                <lightning-input 
+                    label="Summary from" 
+                    type="date" 
+                    name="startDate"
+                    value={date1}
+                    onchange={handleDateChange}>
+                </lightning-input>
+                
+            </lightning-layout-item>
+            
+            <lightning-layout-item padding="around-small" flexibility="auto">
+                <lightning-input 
+                    label="Summary To" 
+                    type="date" 
+                    name="endDate"
+                    value={date2}
+                    onchange={handleDateChange}>
+                </lightning-input>
+               
+            </lightning-layout-item>
+        </lightning-layout>
+    
+
+    <div class="submainContainer">
+        <div>
+            <div class="subdiv1">
+                {leadCounts.total}
+            </div>
+            <p class="heading">TOTAL LEADS</p>
+        </div>
+        <div>
+            <div class="subdiv2">
+                {leadCounts.closed}
+            </div>
+            <p class="heading">CLOSED LEADS</p>
+        </div>
+        <div>
+            <div class="subdiv3">
+                {leadCounts.converted}
+            </div>
+            <p class="heading">CONVERTED LEADS</p>
+        </div>
+        <div>
+            <div class="subdiv4">
+                {leadCounts.rejected}
+            </div>
+            <p class="heading">REJECTED LEADS</p>
+        </div>
+        <div>
+            <div class="subdiv5">
+                {leadCounts.open}
+            </div>
+            <p class="heading">OPEN LEADS</p>
+        </div>
+    </div>
+</template>

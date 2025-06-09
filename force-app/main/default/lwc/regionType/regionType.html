@@ -1,0 +1,43 @@
+<template>
+    <lightning-card title="Order Filter" icon-name="standard:orders">
+        <div class="slds-p-around_medium">
+            <lightning-combobox
+                name="type"
+                label="Type"
+                placeholder="Select Type"
+                value={selectedType}
+                options={typeOptions}
+                onchange={handleTypeChange}>
+            </lightning-combobox>
+            
+            <lightning-combobox
+                name="region"
+                label="Region"
+                placeholder="Select Region"
+                value={selectedRegion}
+                options={regionOptions}
+                onchange={handleRegionChange}>
+            </lightning-combobox>
+            
+            <lightning-button 
+                label="Apply Filters" 
+                variant="brand"
+                onclick={handleFilter}
+                class="slds-m-top_small">
+            </lightning-button>
+        </div>
+        
+        <template if:true={orders}>
+            <lightning-datatable
+                data={orders}
+                columns={columns}
+                key-field="id"
+                hide-checkbox-column="true">
+            </lightning-datatable>
+        </template>
+        
+        <template if:true={error}>
+            <p class="slds-text-color_error">{error}</p>
+        </template>
+    </lightning-card>
+</template>

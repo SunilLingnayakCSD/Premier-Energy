@@ -1,0 +1,169 @@
+<!-- <template>
+    <template if:true={imageUrls.length}>
+        <lightning-carousel>
+            <template for:each={imageUrls} for:item="imgUrl">
+                <lightning-carousel-image 
+                    key={imgUrl}
+                    src={imgUrl}
+                    header="Promo Image"
+                    alternative-text="Promotional Image">
+                </lightning-carousel-image>
+            </template>
+        </lightning-carousel>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+<!-- <template>
+    <template if:true={imageUrls.length}>
+        <div class="image-container">
+            <template for:each={imageUrls} for:item="imgUrl">
+                <img key={imgUrl} src={imgUrl} alt="Promo Image">
+            </template>
+        </div>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+
+<!-- <template>
+    <template if:true={imageUrls.length}>
+        <lightning-carousel>
+            <template for:each={imageUrls} for:item="imgUrl">
+                <lightning-carousel-image 
+                    key={imgUrl}
+                    src={imgUrl}
+                    alternative-text="Promotional Image">
+                </lightning-carousel-image>
+            </template>
+        </lightning-carousel>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+ <!-- <template>
+    <template if:true={imageUrls.length}>
+        <div class="carousel-container">
+            <lightning-carousel disable-auto-scroll={disableAutoScroll}>
+                <template for:each={imageUrls} for:item="imgUrl">
+                    <lightning-carousel-image 
+                        key={imgUrl}
+                        src={imgUrl}
+                        header="Promo Image"
+                        alternative-text="Promotional Image">
+                    </lightning-carousel-image>
+                </template>
+            </lightning-carousel>
+        </div>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+<!-- 
+<template>
+    <template if:true={imageUrls.length}>
+        <div class="carousel-container">
+            <template for:each={imageUrls} for:item="imgUrl">
+                <img key={imgUrl} src={imgUrl} alt="Promo Image">
+            </template>
+        </div>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+
+
+<!-- <template>
+    <template if:true={imageUrls.length}>
+        <lightning-carousel
+            disable-auto-refresh
+            scrollable
+            hide-navigation-buttons
+        >
+            <template for:each={imageUrls} for:item="imgUrl">
+                <lightning-carousel-image
+                    key={imgUrl}
+                    src={imgUrl}
+                    alternative-text="Promotional Image"
+                ></lightning-carousel-image>
+            </template>
+        </lightning-carousel>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+
+<!-- <template>
+    <template if:true={imageUrls.length}>
+        <div class="carousel-container">
+            <div class="carousel-track" style={trackStyle}>
+                <template for:each={imageUrls} for:item="imgUrl">
+                    <div key={imgUrl} class="carousel-item">
+                        <img src={imgUrl} alt="Promotional Image" class="carousel-image" />
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template> -->
+
+
+
+
+<template>
+    <template if:true={imageUrls.length}>
+        <div class="carousel-container">
+            <div class="carousel-track" style={trackStyle}>
+                <template for:each={imageUrls} for:item="imgUrl">
+                    <div key={imgUrl} class="carousel-item">
+                        <img src={imgUrl} alt="Promotional Image" class="carousel-image" />
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+    <template if:false={imageUrls.length}>
+        <p>No images available</p>
+    </template>
+</template>
+
+
+
+<!-- <template>
+    <lightning-flow 
+        flow-api-name="To_Upload_Image_for_Carousel_Component"
+        onstatuschange={handleFlowFinish}
+        flow-input-variables={flowInputVariables}>
+    </lightning-flow>
+
+    <template if:true={imageUrls.length}>
+        <div class="carousel-container">
+            <div class="carousel-track" style={trackStyle}>
+                <template for:each={imageUrls} for:item="imgUrl">
+                    <div key={imgUrl} class="carousel-item">
+                        <img src={imgUrl} alt="Promotional Image" class="carousel-image" />
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={imageUrls.length}>
+        <p class="no-images">No images available</p>
+    </template>
+</template> -->

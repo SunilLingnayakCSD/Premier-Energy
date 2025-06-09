@@ -1,0 +1,592 @@
+@font-face {
+    font-family: 'Bebas Neue';
+    src: url('/resource/BebasNeueFont.tff') format('truetype'); 
+    font-weight: normal;
+    font-style: normal;
+}
+ 
+.nueue {
+    font-family: 'Bebas Neue', sans-serif;
+}
+.background-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    min-height: 100vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color:#f7f8fa;
+    flex-direction: column;
+    font-family: 'century gothic';
+    padding-top: 2rem;
+ 
+ 
+}
+.green-bar {
+    background-color: rgb(102, 184, 81);
+    height: 25px; /* Adjust height as needed */
+    width: 100%; /* Matches form width */
+    display: flex;
+    align-items: center;
+    padding-left: 10px; /* Space for dots */
+    position: relative;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.form-group {
+    position: relative; /* Keep inputs in position */
+    margin-bottom: 5px; /* Ensure enough space for error messages */
+    /* display: flex; */
+    gap: 1rem;
+    justify-content: space-between; 
+     width: 48%;
+     height: 50px;
+     color: #000000;
+     font-size: 0.9em;
+    
+}
+p.SectinHeading{
+  font-family: 'Adobe Garamond Pro';
+    font-size: 1.4em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: left;
+    color: #000000;
+    margin: 0;
+    padding-bottom: 18px;
+    padding-top: 18px;
+    text-decoration: underline;  
+}
+
+p.subSectinHeading{
+  font-family: 'Adobe Garamond Pro';
+    font-size: 1.3em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: left;
+    color: #000000;
+    margin: 0;
+    padding-bottom: 0px;
+    padding-top:10px;
+    text-decoration: underline;   
+}
+::placeholder { 
+    color: black !important;
+    opacity: 1; /* Ensures full color visibility */
+    font-size: 10px;
+    padding-left: 3px;
+}
+option:disabled {
+    color: black;
+}
+
+.error-message {
+    position: absolute;
+    left: 0;
+    bottom: -30px; /* Moves the error below the input */
+    color: red;
+    font-size: 10px;
+    margin-top: 5px;
+}
+ 
+ 
+.input-pair {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between; /* Ensures equal spacing between the fields */
+}
+ 
+.form-group input[name="company"],
+.form-group select[name="Product"],
+.form-group select[name="DCRNonDCR"],
+.form-group select[name="State"],
+.form-group select[name="Segment"] {
+    width: 48%; /* This makes both fields take up almost half the width each */
+    padding: 10px;
+    background-color: #f7f8fa;
+    border: 1px solid #ccc; /* Added border to match other input fields */
+    border-radius: 4px;
+    font-family: 'century gothic';
+    font-size: 10px;
+    line-height: 1.5;
+    color: #000000;
+}
+ 
+.form-group input[name="company"]:focus,
+.form-group select[name="Product"]:focus,
+.form-group select[name="DCRNonDCR"]:focus,
+.form-group select[name="State"]:focus,
+.form-group select[name="Segment"]:focus {
+    outline: none;
+    border: 2px solid #000000;
+    box-shadow: 0 0 5px rgba(89, 121, 194, 0.5);
+}
+ 
+/* Optional: Adjust styling for focus states */
+.form-group input[name="company"]:focus,
+.form-group select[name="Product"]:focus,
+.form-group select[name="DCRNonDCR"]:focus,
+.form-group select[name="State"]:focus,
+.form-group select[name="Segment"]:focus {
+    outline: none;
+    border: 2px solid #000000;
+    box-shadow: 0 0 5px rgba(89, 121, 194, 0.5);
+}
+ 
+/* Ensure that the inputs and select have the same height */
+.input-pair input,
+/* .input-pair select {
+    height: 38px;
+} */
+ 
+ 
+.form {
+    background: rgba(255, 255, 255, 0.9); /* Adjust the last value (0.9) for transparency */
+    padding: 2rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    /* border-radius: 8px; */
+    box-shadow: 0 4px 6px 5px rgba(0, 0, 0, 0.1);
+    /* max-width: 500px; */
+    width: 70%;
+    font-family: 'century gothic';
+    margin-top: 0px;
+    /* border-style: solid;
+    border-color: rgb(0, 0, 0); */
+ 
+}
+ 
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 8%;
+}
+ 
+.input-pair {
+    display: flex;
+    gap: 1rem;
+}
+ 
+.form-input {  
+    width: 100%;
+    padding: 10px;
+    /* background-color: #f7f8fa; */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+ 
+.submit-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+ 
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+.form-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    justify-content: space-between;
+}
+ 
+.input-pair-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+ 
+.input-pair {
+    width: 48%; /* Adjust width of each field to take up 50% of the row */
+}
+ 
+.lastpair {
+    width: 100%; /* Make the message field span the entire row */
+}
+ 
+/* .form-input {
+    width: 100%; 
+    padding: 17px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+} */
+ 
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+ 
+ 
+.clippy_button {
+    box-sizing: border-box;
+    /* -webkit-clip-path: polygon(0 26px, 26px 0, 240px 0, 240px 46px, 214px 70px, 0 70px); */
+    /* clip-path: polygon(0 26px, 26px 0, 240px 0, 240px 46px, 214px 70px, 0 70px); */
+    display: block;
+    width: 250px;
+    height: 50px;
+    background: #0a3085;
+    border: none;
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+    font-family: RationalTWDisplay_semiBold;
+    font-size: 18px;
+    line-height: 1.39;
+    letter-spacing: normal;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+}
+ .clippy_button:hover {
+    background-color: #66B851;;
+}
+ 
+.request-button {
+    margin: -2.5% auto;
+    /* -webkit-clip-path: polygon(0 19px, 19px 0, 153px 0, 153px 33px, 137px 53px, 0 53px); Adjusted clip-path */
+    /* clip-path: polygon(0 19px, 19px 0, 153px 0, 153px 33px, 137px 53px, 0 53px); Adjusted clip-path */
+    font-size: 18px;
+}
+ 
+ 
+ 
+.button:hover {
+    background-color: #004b8a;
+}
+ 
+.slds-scope .slds-input {
+    padding: 38px 30px;
+}
+ 
+.img
+{
+    padding-bottom: 20px;
+  
+}
+ 
+.get-in-touch p.contact-head {
+    font-family: 'Bebas Neue';
+    font-size: 1.8em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: center;
+    color: #000000;
+    margin: 0;
+    padding-bottom: 10px;
+ 
+}
+.g{
+    font-family: 'Bebas Neue';
+    font-size: 1.8em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: center;
+    color: #000000;;
+    margin: 0;
+    padding-bottom: 10px;
+    font-weight: 600;
+}
+.trailing-word {
+    display: inline-block;
+}
+ 
+p.contact-desc{
+    font-family: 'Source Sans Pro';
+    font-size: 1.3em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: center;
+    color: #000000;
+    margin: 0;
+    padding-bottom: 20px;
+    
+}
+p.SectinHeading{
+  font-family: 'Adobe Garamond Pro';
+    font-size: 1.1em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: left;
+    color: #000000;
+    margin: 0;
+    padding-bottom: 20px;
+    text-decoration: underline;  
+}
+
+p.subSectinHeading{
+  font-family: 'Adobe Garamond Pro';
+    font-size: 1.1em;
+    line-height: 1.05;
+    letter-spacing: normal;
+    text-align: left;
+    color: #000000;
+    margin: 0;
+    padding-bottom: 0px;
+    text-decoration: underline;   
+}
+ 
+ 
+.footer{
+    padding-top: 2%;
+}
+ 
+.form-group input[name="company"],
+.form-group select[name="Product"],
+.form-group select[name="DCRNonDCR"],
+.form-group select[name="State"],
+.form-group select[name="Segment"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #f7f8fa;
+    border: 1px solid #ccc; /* Added border to match other input fields */
+    border-radius: 4px;
+    font-family: 'century gothic';
+    font-size: 10px;
+    line-height: 1.5;
+    color: #000000;
+}
+ 
+.form-group lightning-combobox[name="Product"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #f7f8fa;
+    border: 0px;
+    font-family: 'century gothic';
+    font-size: 1em;
+    line-height: 1.5;
+    color: #000000;
+}
+ 
+/* Optional: Adjust styling for focus states */
+.form-group input[name="company"]:focus,
+.form-group lightning-combobox[name="Product"]:focus
+ {
+    outline: none;
+    border: 2px solid #000000;
+    box-shadow: 0 0 5px rgba(89, 121, 194, 0.5);
+}
+ 
+.form-group select[name="Product"],
+.form-group select[name="Segment"],
+.form-group select[name="State"],
+.form-group select[name="DCRNonDCR"]{
+    width: 100%;
+    padding: 10px;
+    background-color: #f7f8fa;
+    border: 1px solid #ccc; /* Added border to match other input fields */
+    border-radius: 4px;
+    font-family: 'century gothic';
+    font-size: 10px;
+    line-height: 1.5;
+    color: #000000;
+    
+}
+ 
+/* Optional: Adjust styling for focus states for the select box */
+.form-group select[name="Product"]:focus,
+.form-group select[name="Segment"]:focus,
+.form-group select[name="State"]:focus,
+.form-group select[name="DCRNonDCR"]:focus {
+    outline: none;
+    /* border: 2px solid #5979c2; */
+    box-shadow: 0 0 5px rgba(89, 121, 194, 0.5);
+}
+ 
+/* Ensure the select box has the same height as the input fields */
+/* .form-group select {
+    height: 38px;
+} */
+ 
+ 
+/* To make sure combobox and input have same height */
+/* .form-group lightning-combobox button {
+    height: 50px; 
+   
+} */
+/* lightning-combobox{
+ padding: 7px;
+} */
+ 
+/* For consistency in the spacing */
+.input-pair {
+    display: flex;
+    gap: 1rem;
+}
+ 
+ 
+ /* New Css */
+.other-contacts p.other-head {
+    font-family: TitilliumWeb_bold;
+    font-size: 2em;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-align: center;
+    color: #18181899;
+    margin: 0;
+}
+ 
+.contact-row .card p.method-head {
+    font-family: FivoSans_medium;
+    font-size: 1em;
+    line-height: 1.38;
+    letter-spacing: normal;
+    text-align: center;
+    color: #000000;
+    text-transform: uppercase;
+    margin: 0;
+    padding-top: 30px;
+    padding-bottom: 10px;
+}
+.label{
+    font-size: 12px;
+}
+ 
+.contact-row .card p.method-email a {
+    font-family: RationalTWDisplay_semiBold;
+    font-size: 1em;
+    line-height: 1.56;
+    letter-spacing: normal;
+    color: #e65965;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+ 
+ 
+.other-contacts p.other-head {
+    font-family: TitilliumWeb_bold;
+    font-size: 2em;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-align: center;
+    color: #18181899;
+    margin: 0;
+}
+.other-contacts .content {
+    padding-top: 4vw;
+}
+.contact-row {
+    padding-top: 9vw;
+    padding-left: 2vw;
+    padding-right: 2vw;
+}
+.contact-row .card {
+    padding-bottom: 40px;
+    border: none;
+}
+.contact-row .card .inner {
+    padding: 20px;
+    border-radius: 2px;
+    box-shadow: 0 0 15px 0 rgba(23, 20, 82, .1);
+    background-color: #fff;
+    margin: 15px;
+}
+.contact-row .card .contact-icon {
+    width: 11.8vw;
+    height: 11.8vw;
+    box-shadow: 0 0 10px 0 rgba(92, 93, 126, .2);
+    background-color: #fff;
+    border-radius: 50%;
+    margin: -5.9vw auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.contact-row .card .contact-icon svg {
+    font-size: 3.5em;
+}
+.contact-row .card p.method-head {
+    font-family: FivoSans_medium;
+    font-size: 1em;
+ 
+    line-height: 1.38;
+    letter-spacing: normal;
+    text-align: center;
+    color: #000000;
+    text-transform: uppercase;
+    margin: 0;
+    padding-top: 30px;
+    padding-bottom: 10px;
+}
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.contact-row .card-1 .column-1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+ 
+.contact-row .card p.method-email {
+    margin: 0;
+    padding-bottom: 15px;
+    text-align: center;
+}
+.contact-row .card-2 p.method-desc, .contact-row .card-3 p.method-desc {
+    width: 22vw;
+    text-align: center;
+    margin: 0 auto;
+}
+.contact-row .card p.method-desc {
+    opacity: .8;
+    font-family: FivoSans_regular;
+    font-size: 1em;
+    line-height: 1.5;
+    letter-spacing: normal;
+    color: #000000;
+    margin: 0;
+}
+.contact-row .card p.contact-num, .contact-row .card p.locate-map {
+    text-align: center;
+    margin: 0;
+}
+.contact-row .card p.contact-num, .contact-row .card p.locate-map a, .contact-row .card p.method-email a {
+    font-family: RationalTWDisplay_semiBold;
+    font-size: 1em;
+    line-height: 1.56;
+    letter-spacing: normal;
+    color: #e65965;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+ 
+.other-contacts {
+    background-image: url(/static/dots_small-236c8f9….png);
+    background-repeat: no-repeat;
+    background-position: 50px 50px;
+    margin-bottom: 10vh;
+}
+ 
+ 
+.contact-row {
+    padding-top: 9vw;
+    padding-left: 2vw;
+    padding-right: 2vw;
+}
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    display: flex;
+    flex-direction: row;
+}
+ 
+ 
+.sechead
+{
+    padding-top: 20px;
+    font-family: 'century gothic';
+}

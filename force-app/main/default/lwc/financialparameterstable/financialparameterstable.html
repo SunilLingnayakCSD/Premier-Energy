@@ -1,0 +1,628 @@
+<template>
+    <div class="main slds-m-around_medium">
+        <template if:true={financialParams}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered financial-table">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="slds-text-title_caps" scope="col">Parameter</th>
+                        <th class="slds-text-title_caps" scope="col">Value</th>
+                        <th class="slds-text-title_caps" scope="col">EDIT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- USD/INR Row -->
+                    <tr class="data-row">
+                        <td>1$</td>
+                        <td>
+                            <template if:true={isEditingUsd}>
+                                <lightning-input 
+                                    type="number" 
+                                    value={financialParams.USD_to_INR_CBITC__c}
+                                    step="0.01" 
+                                    onchange={handleValueChange}
+                                    data-field="USD_to_INR_CBITC__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingUsd}>
+                                {financialParams.USD_to_INR_CBITC__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingUsd}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingUsd}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="USD_to_INR_CBITC__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+
+                    <!-- Overhead Cost Row -->
+                    <tr class="data-row">
+                        <td>Module Overhead cost (cents/Wp)-DOE,OOE,EBE,Warranty prov</td>
+                        <td>
+                            <template if:true={isEditingOverhead}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.Overhead_cost_mdt__c} 
+                                    onchange={handleValueChange}
+                                    data-field="Overhead_cost_mdt__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingOverhead}>
+                                {financialParams.Overhead_cost_mdt__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingOverhead}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingOverhead}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="Overhead_cost_mdt__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+
+                    <!-- Repeat pattern for other rows with unique data-field attributes -->
+                    <!-- Example for Financial Cost -->
+                    <tr class="data-row">
+                        <td>Module Finance Cost(Cents/Wp)-DEPT,Int TL & WC, Hedge</td>
+                        <td>
+                            <template if:true={isEditingFinanceCost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.Finance_Cost__c} 
+                                    onchange={handleValueChange}
+                                    data-field="Finance_Cost__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingFinanceCost}>
+                                {financialParams.Finance_Cost__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingFinanceCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingFinanceCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="Finance_Cost__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                   
+                    <tr class="data-row">
+                        <td>Cell - Overhead Cost (Cents/Wp)- DOE,OOE,EBE,Warranty prov</td>
+                        <td>
+                            <template if:true={isEditingcelloverheadCost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.Cell_Overhead_Cost__c} 
+                                    onchange={handleValueChange}
+                                    data-field="Cell_Overhead_Cost__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingcelloverheadCost}>
+                                {financialParams.Cell_Overhead_Cost__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingcelloverheadCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingcelloverheadCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="Cell_Overhead_Cost__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                   
+                    <tr class="data-row">
+                        <td>Cell- Finance Cost(Cents/Wp)- DEPT, Int TL &WC,Hedge</td>
+                        <td>
+                            <template if:true={isEditingcellFinanceCost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.Cell_Finance_Cost__c} 
+                                    onchange={handleValueChange}
+                                    data-field="Cell_Finance_Cost__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingcellFinanceCost}>
+                                {financialParams.Cell_Finance_Cost__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingcellFinanceCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingcellFinanceCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="Cell_Finance_Cost__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+
+                    <!-- 6 -->
+                    <tr class="data-row">
+                        <td>Cell BOM Cost (Cents/Wp)</td>
+                        <td>
+                            <template if:true={isEditingcellbomCost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.Cell_BOM_Cost__c} 
+                                    onchange={handleValueChange}
+                                    data-field="Cell_BOM_Cost__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingcellbomCost}>
+                                {financialParams.Cell_BOM_Cost__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingcellbomCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingcellbomCost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="Cell_BOM_Cost__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 7 -->
+                    <tr class="data-row">
+                        <td>Module Warranty Insurance %</td>
+                        <td>
+                            <template if:true={isEditingmodulewarrantyInsurance}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.ModuleWarrantyInsurance__c} 
+                                    onchange={handleValueChange}
+                                    data-field="ModuleWarrantyInsurance__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingmodulewarrantyInsurance}>
+                                {financialParams.ModuleWarrantyInsurance__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingmodulewarrantyInsurance}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingmodulewarrantyInsurance}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="ModuleWarrantyInsurance__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 8 -->
+                    <tr class="data-row">
+                        <td>RFID reader cost (INR/Pcs)</td>
+                        <td>
+                            <template if:true={isEditingmodulerfidreadercost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.RFIDreadercost__c} 
+                                    onchange={handleValueChange}
+                                    data-field="RFIDreadercost__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingmodulerfidreadercost}>
+                                {financialParams.RFIDreadercost__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingmodulerfidreadercost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingmodulerfidreadercost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="RFIDreadercost__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 9 -->
+                    <tr class="data-row">
+                        <td>B-Grade Module Yield %</td>
+                        <td>
+                            <template if:true={isEditingbgrademodule}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.B_Grade_Module_Yield__c} 
+                                    onchange={handleValueChange}
+                                    data-field="B_Grade_Module_Yield__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingbgrademodule}>
+                                {financialParams.B_Grade_Module_Yield__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingbgrademodule}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingbgrademodule}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="B_Grade_Module_Yield__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 10 -->
+                     <tr class="data-row">
+                        <td>B-Grade Module Discount %</td>
+                        <td>
+                            <template if:true={isEditingbgrademodulediscount}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.B_Grade_Module_Discount__c} 
+                                    onchange={handleValueChange}
+                                    data-field="B_Grade_Module_Discount__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingbgrademodulediscount}>
+                                {financialParams.B_Grade_Module_Discount__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingbgrademodulediscount}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingbgrademodulediscount}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="B_Grade_Module_Discount__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 11 -->
+                    <tr class="data-row">
+                        <td>ABG/PBG Cost P.A. %</td>
+                        <td>
+                            <template if:true={isEditingbgradeabgpbgcost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.ABGPBGCostPA__c} 
+                                    onchange={handleValueChange}
+                                    data-field="ABGPBGCostPA__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingbgradeabgpbgcost}>
+                                {financialParams.ABGPBGCostPA__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingbgradeabgpbgcost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingbgradeabgpbgcost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="ABGPBGCostPA__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 12 -->
+                    <tr class="data-row">
+                        <td>LC interest cost P.A %</td>
+                        <td>
+                            <template if:true={isEditinglcintrest}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.LCinterestcostPA__c} 
+                                    onchange={handleValueChange}
+                                    data-field="LCinterestcostPA__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditinglcintrest}>
+                                {financialParams.LCinterestcostPA__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditinglcintrest}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditinglcintrest}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="LCinterestcostPA__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                    <!-- 13 -->
+                    
+                    <!-- 14 -->
+                    <tr class="data-row">
+                        <td>GST %</td>
+                        <td>
+                            <template if:true={isEditingGst}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.GST__c} 
+                                    onchange={handleValueChange}
+                                    data-field="GST__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditingGst}>
+                                {financialParams.GST__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditingGst}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditingGst}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="GST__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+
+                    <!-- 15 -->
+                    <tr class="data-row">
+                        <td>Insurnace Premium cost %</td>
+                        <td>
+                            <template if:true={isEditinginsurancepremiumcost}>
+                                <lightning-input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={financialParams.InsurnacePremiumcost__c} 
+                                    onchange={handleValueChange}
+                                    data-field="InsurnacePremiumcost__c">
+                                </lightning-input>
+                            </template>
+                            <template if:false={isEditinginsurancepremiumcost}>
+                                {financialParams.InsurnacePremiumcost__c}
+                            </template>
+                        </td>
+                        <td>
+                            <template if:true={isEditinginsurancepremiumcost}>
+                                <lightning-button-icon
+                                    icon-name="utility:save"
+                                    alternative-text="Save"
+                                    onclick={handleSave}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    alternative-text="Cancel"
+                                    onclick={handleCancel}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                            <template if:false={isEditinginsurancepremiumcost}>
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    alternative-text="Edit"
+                                    data-field="InsurnacePremiumcost__c"
+                                    onclick={handleEdit}
+                                    class="slds-m-left_x-small">
+                                </lightning-button-icon>
+                            </template>
+                        </td>
+                    </tr>
+                   
+                    
+                </tbody>
+            </table>
+        </template>
+    </div>
+</template>
