@@ -1,0 +1,45 @@
+<template>
+    <lightning-card title="Territory" icon-name="standard:account">
+        <div class="slds-p-around_medium">
+
+            <!-- Account Search -->
+            <lightning-input 
+                label="Search Account" 
+                type="search" 
+                onchange={handleSearch} 
+                placeholder="Type to search...">
+            </lightning-input>
+
+            <!-- Account Dropdown -->
+            <lightning-combobox
+                name="account"
+                label="Select Account"
+                value={selectedAccountId}
+                placeholder="Select an Account"
+                options={accountOptions}
+                onchange={handleAccountChange}>
+            </lightning-combobox>
+
+            <!-- Territory Dropdown -->
+            <template if:true={territoryOptions.length}>
+                <lightning-combobox
+                    name="territory"
+                    label="Select Territory"
+                    value={selectedTerritory}
+                    placeholder="Select a Territory"
+                    options={territoryOptions}
+                    onchange={handleTerritoryChange}>
+                </lightning-combobox>
+            </template>
+
+            <lightning-button
+                class="slds-m-top_medium slds-align_absolute-center"
+                label="SUBMIT"
+                variant="brand"
+                onclick={handleSave}>
+            </lightning-button>
+
+
+        </div>
+    </lightning-card>
+</template>

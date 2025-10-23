@@ -91,7 +91,7 @@ option:disabled {
 .error-message {
     position: absolute;
     left: 0;
-    bottom: -30px; /* Moves the error below the input */
+    bottom: 50px;
     color: red;
     font-size: 10px;
     margin-top: 5px;
@@ -404,21 +404,7 @@ p.subSectinHeading{
     /* border: 2px solid #5979c2; */
     box-shadow: 0 0 5px rgba(89, 121, 194, 0.5);
 }
- 
-/* Ensure the select box has the same height as the input fields */
-/* .form-group select {
-    height: 38px;
-} */
- 
- 
-/* To make sure combobox and input have same height */
-/* .form-group lightning-combobox button {
-    height: 50px; 
-   
-} */
-/* lightning-combobox{
- padding: 7px;
-} */
+
  
 /* For consistency in the spacing */
 .input-pair {

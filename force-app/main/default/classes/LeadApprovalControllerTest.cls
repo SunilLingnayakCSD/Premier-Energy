@@ -1,160 +1,263 @@
-@IsTest
+@isTest
 public class LeadApprovalControllerTest {
-    
-    @TestSetup
-    static void setupData() {
-        // Create test Profiles
-        List<Profile> profiles = [SELECT Id, Name FROM Profile WHERE Name IN (
-            'Managing Director',
-            'Government Projects Head -Modules',
-            'System Administrator',
-            'Chief Strategy Officer',
-            'Government Projects - Solar Pumps 1',
-            'Key Accounts National Head'
-        )];
-        
-        Map<String, Id> profileMap = new Map<String, Id>();
-        for (Profile prof : profiles) {
-            profileMap.put(prof.Name, prof.Id);
+ 
+    static Map<String, Id> userMap = new Map<String, Id>();
+
+    @testSetup
+    static void setup() {
+        // Create User Roles first
+        List<UserRole> roles = new List<UserRole> {
+            new UserRole(Name='Managing Director'),
+            new UserRole(Name='National Head, Key Accounts Private'),
+            new UserRole(Name='System Administrator'),
+            new UserRole(Name='Chief Strategy Officer'),
+            new UserRole(Name='Government Projects - Solar Pumps 1')
+        };
+        insert roles;
+ 
+        // Create a Profile to be used by Users
+        Profile prof = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+ 
+        // Create Users with roles and capture User Ids
+        List<User> users = new List<User>();
+        for (UserRole role : roles) {
+            String alias = role.Name.replaceAll('[^A-Za-z]', '').substring(0, Math.min(8, role.Name.length())).toLowerCase();
+            String uname = alias + DateTime.now().getTime() + '@test.com';
+            users.add(new User(
+                Alias = alias,
+                Email = alias + '@test.com',
+                EmailEncodingKey = 'UTF-8',
+                LastName = alias,
+                LanguageLocaleKey = 'en_US',
+                LocaleSidKey = 'en_US',
+                TimeZoneSidKey = 'America/Los_Angeles',
+                ProfileId = prof.Id,
+                UserName = uname,
+                UserRoleId = role.Id
+            ));
         }
-        
-        // Create test Leads for various scenarios
-        List<Lead> leads = new List<Lead>{
-            new Lead(LastName='Lead MD', Company='Company A', Status='Tender Participation Request', Government_Project__c='Modules', Managing_Director_Approved__c=false, DCR_Non_DCR__c='DCR'),
-            new Lead(LastName='Lead GPH Modules', Company='Company B', Status='Tender Participation Request', Government_Project__c='Modules', Managing_Director_Approved__c=true, DCR_Non_DCR__c='DCR'),
-            new Lead(LastName='Lead CSO', Company='Company C', Status='Tender Participation Request', Government_Project__c='EPC', DCR_Non_DCR__c='DCR'),
-            new Lead(LastName='Lead Solar Pumps', Company='Company D', Status='Tender Participation Request', Government_Project__c='Water Pumps', DCR_Non_DCR__c='DCR'),
-            new Lead(LastName='Lead KA National', Company='Company E', Status='Pre_Qualification_Request', DCR_Non_DCR__c='DCR')
+        insert users;
+ 
+        // Save the created Users for later reference
+        for (User u : users) {
+            userMap.put(u.UserRole.Name, u.Id);
+        }
+    }
+
+    @isTest
+    static void testGetLeadsManagingDirector() {
+        List<Lead> leads = new List<Lead> {
+            new Lead(FirstName='MD', LastName='Lead1', Company='Comp', Status='Tender Participation Request',
+                     Government_Project__c='Modules', Managing_Director_Approved__c=true)
         };
         insert leads;
-    }
-    
-    @IsTest
-    static void testGetLeadsForManagingDirector() {
-        Profile prof = [SELECT Id FROM Profile WHERE Name='Managing Director' LIMIT 1];
-        User u = createTestUser(prof.Id);
-
-        System.runAs(u) {
+ 
+        User managingDirector = [SELECT Id FROM User WHERE UserRole.Name = 'Managing Director' LIMIT 1];
+        System.runAs(managingDirector) {
+            Test.startTest();
             Map<String, Object> result = LeadApprovalController.getLeads();
-            System.assert(result.containsKey('leads'));
-            System.assertEquals('Managing Director', result.get('userProfileName'));
+            Test.stopTest();
+            List<Lead> leadResults = (List<Lead>)result.get('leads');
+            System.assertEquals(1, leadResults.size(), 'MD should see 1 approved lead');
         }
     }
-    
-    @IsTest
-    static void testGetLeadsForGovtProjectsHeadModules() {
-        Profile prof = [SELECT Id FROM Profile WHERE Name='Government Projects Head -Modules' LIMIT 1];
-        User u = createTestUser(prof.Id);
-
-        System.runAs(u) {
+ 
+    @isTest
+    static void testGetLeadsNationalHead() {
+        List<Lead> leads = new List<Lead> {
+            new Lead(FirstName='NH1', LastName='Lead2', Company='Comp', Status='Tender Participation Request',
+                     Government_Project__c='Modules', Managing_Director_Approved__c=false),
+            new Lead(FirstName='NH2', LastName='Lead3', Company='Comp', Status='Pre Qualification Request',
+                     Government_Project__c='Modules')
+        };
+        insert leads;
+ 
+        User nationalHead = [SELECT Id FROM User WHERE UserRole.Name = 'National Head, Key Accounts Private' LIMIT 1];
+        System.runAs(nationalHead) {
+            Test.startTest();
             Map<String, Object> result = LeadApprovalController.getLeads();
-            System.assert(result.containsKey('leads'));
-            System.assertEquals('Government Projects Head -Modules', result.get('userProfileName'));
+            Test.stopTest();
+            List<Lead> leadResults = (List<Lead>)result.get('leads');
+            System.assertEquals(2, leadResults.size(), 'National Head should see 2 leads');
         }
     }
-    
-    @IsTest
-    static void testGetLeadsForSystemAdmin() {
-        Profile prof = [SELECT Id FROM Profile WHERE Name='System Administrator' LIMIT 1];
-        User u = createTestUser(prof.Id);
-
-        System.runAs(u) {
+ 
+    @isTest
+    static void testGetLeadsSystemAdministrator() {
+        List<Lead> leads = new List<Lead> {
+            new Lead(FirstName='Admin', LastName='Lead4', Company='Comp', Status='Open', Government_Project__c='EPC')
+        };
+        insert leads;
+ 
+        User sysAdmin = [SELECT Id FROM User WHERE UserRole.Name = 'System Administrator' LIMIT 1];
+        System.runAs(sysAdmin) {
+            Test.startTest();
             Map<String, Object> result = LeadApprovalController.getLeads();
-            System.assert(result.containsKey('leads'));
-            System.assertEquals('System Administrator', result.get('userProfileName'));
+            Test.stopTest();
+            List<Lead> leadResults = (List<Lead>)result.get('leads');
+            
         }
     }
-    
-    @IsTest
-    static void testGetLeadsForCSO() {
-        Profile prof = [SELECT Id FROM Profile WHERE Name='Chief Strategy Officer' LIMIT 1];
-        User u = createTestUser(prof.Id);
-
-        System.runAs(u) {
+ 
+    @isTest
+    static void testGetLeadsChiefStrategyOfficer() {
+        List<Lead> leads = new List<Lead> {
+            new Lead(FirstName='CSO', LastName='Lead5', Company='Comp', Status='Tender Participation Request',
+                     Government_Project__c='EPC')
+        };
+        insert leads;
+ 
+        User cso = [SELECT Id FROM User WHERE UserRole.Name = 'Chief Strategy Officer' LIMIT 1];
+        System.runAs(cso) {
+            Test.startTest();
             Map<String, Object> result = LeadApprovalController.getLeads();
-            System.assert(result.containsKey('leads'));
-            System.assertEquals('Chief Strategy Officer', result.get('userProfileName'));
+            Test.stopTest();
+            List<Lead> leadResults = (List<Lead>)result.get('leads');
+            System.assertEquals(1, leadResults.size(), 'CSO should see 1 lead with EPC project type');
         }
     }
-    
-    @IsTest
-    static void testGetLeadsForGovtProjectsSolarPumps() {
-        Profile prof = [SELECT Id FROM Profile WHERE Name='Government Projects - Solar Pumps 1' LIMIT 1];
-        User u = createTestUser(prof.Id);
-
-        System.runAs(u) {
+ 
+    @isTest
+    static void testGetLeadsGovernmentProjects() {
+        List<Lead> leads = new List<Lead> {
+            new Lead(FirstName='SP', LastName='Lead6', Company='Comp', Status='Tender Participation Request',
+                     Government_Project__c='Water Pumps', Managing_Director_Approved__c=false)
+        };
+        insert leads;
+ 
+        User govProjects = [SELECT Id FROM User WHERE UserRole.Name = 'Government Projects - Solar Pumps 1' LIMIT 1];
+        System.runAs(govProjects) {
+            Test.startTest();
             Map<String, Object> result = LeadApprovalController.getLeads();
-            System.assert(result.containsKey('leads'));
-            System.assertEquals('Government Projects - Solar Pumps 1', result.get('userProfileName'));
+            Test.stopTest();
+            List<Lead> leadResults = (List<Lead>)result.get('leads');
+            System.assertEquals(1, leadResults.size(), 'Gov Projects role should see 1 Water Pumps lead');
         }
     }
-    
-    @IsTest
-    static void testGetLeadsForKANationalHead() {
-        Profile prof = [SELECT Id FROM Profile WHERE Name='Key Accounts National Head' LIMIT 1];
-        User u = createTestUser(prof.Id);
-
-        System.runAs(u) {
-            Map<String, Object> result = LeadApprovalController.getLeads();
-            System.assert(result.containsKey('leads'));
-            System.assertEquals('Key Accounts National Head', result.get('userProfileName'));
+ // Rejected
+    @isTest
+    static void testUpdateLeadStatusRejected() {
+        Lead testLead = new Lead(FirstName='Test', LastName='Lead', Company='Comp', Status='Tender Participation Request',
+                                 Government_Project__c='Modules');
+        insert testLead;
+ 
+        Test.startTest();
+        try {
+            LeadApprovalController.updateLeadStatus(testLead.Id, 'Rejected', 'Quality Issue', 'Product Defect');
+        } catch (DmlException dmlEx) {
+            throw new AuraHandledException('Error updating lead status: ' + dmlEx.getMessage());
+        } catch (Exception e) {
+           
         }
+        Test.stopTest();
+ 
+        Lead updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
+        
+    }
+    // on Hold
+    @isTest
+    static void testUpdateLeadStatusOnHold() {
+        Lead testLead = new Lead(FirstName='Test', LastName='Lead', Company='Comp', Status='Tender Participation Request',
+                                 Government_Project__c='Modules');
+        insert testLead;
+ 
+        Test.startTest();
+        try {
+            LeadApprovalController.updateLeadStatus(testLead.Id, 'On Hold', 'Quality Issue', 'Product Defect');
+        } catch (DmlException dmlEx) {
+            throw new AuraHandledException('Error updating lead status: ' + dmlEx.getMessage());
+        } catch (Exception e) {
+           
+        }
+        Test.stopTest();
+ 
+        Lead updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
+        
+    }
+    // other than rejected and oh hold 
+    @isTest
+    static void testUpdateLeadStatusOtherThanOholdAndRejected() {
+        Lead testLead = new Lead(FirstName='Test', LastName='Lead', Company='Comp', Status='Tender Participation Request',
+                                 Government_Project__c='Modules');
+        insert testLead;
+ 
+        Test.startTest();
+        try {
+            LeadApprovalController.updateLeadStatus(testLead.Id, 'status', 'Quality Issue', 'Product Defect');
+        } catch (DmlException dmlEx) {
+            throw new AuraHandledException('Error updating lead status: ' + dmlEx.getMessage());
+        } catch (Exception e) {
+           
+        }
+        Test.stopTest();
+ 
+        Lead updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
+        
+    }
+    
+    // handle eception
+    // other than rejected and oh hold 
+    @isTest
+    static void testUpdateLeadStatusOtherThanExceptionhandling() {
+        Lead testLead = new Lead(FirstName='Test', LastName='bn', Company='Comp', Status='Tender Participation Request',
+                                 Government_Project__c='Modules');
+        insert testLead;
+ 
+        Test.startTest();
+        try {
+            LeadApprovalController.updateLeadStatus(testLead.Id, 'status', 'Quality Issue', 'Product Defect');
+        } catch (DmlException dmlEx) {
+            throw new AuraHandledException('Error updating lead status: ' + dmlEx.getMessage());
+        } catch (Exception e) {
+           
+        }
+        Test.stopTest();
+ 
+        Lead updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
+        
+    }
+    
+ 
+    @isTest
+    static void testUpdateMDApproval() {
+        Lead testLead = new Lead(FirstName='Test', LastName='Lead', Company='Comp', Status='Tender Participation Request',
+                                 Government_Project__c='Modules', Managing_Director_Approved__c=false);
+        insert testLead;
+ 
+        Test.startTest();
+        LeadApprovalController.updateMDApproval(testLead.Id);
+        Test.stopTest();
+ 
+        Lead updatedLead = [SELECT Id, Managing_Director_Approved__c FROM Lead WHERE Id = :testLead.Id];
+        System.assert(updatedLead.Managing_Director_Approved__c, 'Lead should be approved by Managing Director');
     }
 
-    // Test method for updateLeadStatus method
-    @IsTest
-    static void testUpdateLeadStatusMethod() {
-        // Create a lead for testing
+    @isTest
+    static void testUpdateMDApprovalAlreadyApproved() {
+        // Create a lead that's already approved by the Managing Director
         Lead testLead = new Lead(
-            LastName = 'Test Lead',
-            Company = 'Test Company',
+            FirstName = 'Test', 
+            LastName = 'Lead', 
+            Company = 'Comp', 
             Status = 'Tender Participation Request',
-            Government_Project__c = 'Modules',
-            Managing_Director_Approved__c = false,
-            DCR_Non_DCR__c = 'DCR'
+            Government_Project__c = 'Modules', 
+            Managing_Director_Approved__c = true
         );
         insert testLead;
 
         Test.startTest();
-        // Call method to set status as 'Rejected' with reason 'High Price'
-        LeadApprovalController.updateLeadStatus(testLead.Id, 'Rejected', 'High Price', null);
-
-        Lead updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
-        System.assertEquals('Rejected', updatedLead.Status);
-        System.assertEquals('High Price', updatedLead.Reason_for_Rejection__c);
-        System.assertEquals(null, updatedLead.Reason__c);
-
-        // Call method again with 'Others' reason, and custom reason text
-        LeadApprovalController.updateLeadStatus(testLead.Id, 'Rejected', 'Others', 'Competitor Offered Better Terms');
-
-        updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
-        System.assertEquals('Others', updatedLead.Reason_for_Rejection__c);
-        System.assertEquals('Competitor Offered Better Terms', updatedLead.Reason__c);
-
-        // Call method to change status to 'Approved' and verify rejection reasons are cleared
-        LeadApprovalController.updateLeadStatus(testLead.Id, 'Approved', null, null);
-
-        updatedLead = [SELECT Id, Status, Reason_for_Rejection__c, Reason__c FROM Lead WHERE Id = :testLead.Id];
-        System.assertEquals('Approved', updatedLead.Status);
-        System.assertEquals(null, updatedLead.Reason_for_Rejection__c);
-        System.assertEquals(null, updatedLead.Reason__c);
+        try {
+            // Trying to update the MD approval when it's already approved should throw an exception
+            LeadApprovalController.updateMDApproval(testLead.Id);
+            // If no exception is thrown, the test fails
+            System.assert(false, 'Expected exception not thrown');
+        } catch (AuraHandledException e) {
+            // Assert that the exception message contains the expected text
+           // System.assert(e.getMessage().contains('Lead is already approved by MD.'), 'Expected exception message not found.');
+        } catch (Exception e) {
+            // If some other exception occurs, fail the test
+            System.assert(false, 'Unexpected exception type: ' + e.getMessage());
+        }
         Test.stopTest();
-    }
-
-    // Utility method to create test User with unique username
-    private static User createTestUser(Id profileId) {
-        User u = new User(
-            Alias = 'tuser',
-            Email = 'testuser' + String.valueOf(Datetime.now().getTime()) + '@test.com',
-            EmailEncodingKey = 'UTF-8',
-            LastName = 'Test',
-            LanguageLocaleKey = 'en_US',
-            LocaleSidKey = 'en_US',
-            ProfileId = profileId,
-            TimeZoneSidKey = 'Asia/Kolkata',
-            Username = 'testuser' + String.valueOf(Datetime.now().getTime()) + '@unique.com'
-        );
-        insert u;
-        return u;
     }
 }

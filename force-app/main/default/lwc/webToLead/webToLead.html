@@ -1,4 +1,5 @@
 <template>
+    <template if:true={form}>
     <div class="background-container">
 
         <div class="form">
@@ -100,24 +101,24 @@
                     BUSINESS & PRODUCT INFORMATION:<br>
                 </p>
 
-                <div class="input-pair-row">
+                <!-- <div class="input-pair-row">
                     <div class="form-group">
                         <label for="DCRNonDCR">DCR/NON-DCR</label><br>
                         <select id="DCRNonDCR" name="DCRNonDCR" onchange={LeadChangeVal} >
                         <option value="" disabled selected></option>
                         <option value="DCR">DCR</option>
-                        <option value="Non DCR">Non DCR</option>
+                        <option value="NON-DCR">NON-DCR</option>
                     </select>
                         <template if:true={DCRNonDCRError}>
                             <span class="error-message">{DCRNonDCRError}</span>
                         </template>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="input-pair-row">
                     <div class="form-group">
                         <label for="date">Delivery Due Date</label><br>
-                        <input type="Date" name="Date"  value={date} onchange={LeadChangeVal} class="form-input lastName"  />
+                        <input type="Date" name="Date"  value={Date} onchange={LeadChangeVal} class="form-input lastName" placeholder="dd/mm/yyyy" />
                         <template if:true={DeliverDateError}>
                             <span class="error-message">{QuantityError}</span>
                         </template> 
@@ -145,8 +146,17 @@
                 </div>
             </div>
             <div class="footer">
-                <button class="clippy_button request-button" type="button" onclick={insertLeadAction}>Submit</button>
+                <button class="clippy_button request-button" type="button" onclick={insertLeadAction} disabled={isSubmitting}>{submitButtonLabel}</button>
             </div>
         </div>
     </div>
+</template>
+    <!-- <template if:true={Thankyou}>
+        <lightning-card>
+            <div class="thank-you-message">
+                <h2>Thank you for submitting your information!</h2>
+                <p>We'll be in touch shortly.</p>
+            </div>
+        </lightning-card>
+    </template> -->
 </template>

@@ -1,202 +1,165 @@
-public with sharing class PurchaseOrderController {
-    // Get orders with filters
-    @AuraEnabled(cacheable=true)
-    public static List<Order> getOrders(String type, String region) {
-        String query = 'SELECT Id, Name, Type__c, Region__c FROM Order';
-        List<String> conditions = new List<String>();
-        
-        if (String.isNotBlank(type)) {
-            conditions.add('Type__c = :type');
-        }
-        
-        if (String.isNotBlank(region)) {
-            conditions.add('Region__c = :region');
-        }
-        
-        if (!conditions.isEmpty()) {
-            query += ' WHERE ' + String.join(conditions, ' AND ');
-        }
-        
-        return Database.query(query);
-    }
-
-    // Get picklist values
-    @AuraEnabled(cacheable=true)
-    public static Map<String, List<String>> getPicklistValues() {
-        Map<String, List<String>> picklistValues = new Map<String, List<String>>();
-        
-        // Get Type picklist values
-        List<String> typeValues = new List<String>();
-        for (PicklistEntry entry : Order.Type__c.getDescribe().getPicklistValues()) {
-            typeValues.add(entry.getValue());
-        }
-        picklistValues.put('type', typeValues);
-        
-        // Get Region picklist values
-        List<String> regionValues = new List<String>();
-        for (PicklistEntry entry : Order.Region__c.getDescribe().getPicklistValues()) {
-            regionValues.add(entry.getValue());
-        }
-        picklistValues.put('region', regionValues);
-        
-        return picklistValues;
-    }
-
-    // Get purchase orders for approval
+public without sharing class PurchaseOrderController {
+    
     @AuraEnabled(cacheable=true)
     public static Map<String, Object> getPurchaseOrders() {
-        Map<String, Object> result = new Map<String, Object>(); 
-        
+        Map<String, Object> result = new Map<String,Object>(); 
         try {
-            User currentUser = [
-                SELECT Id, UserRole.DeveloperName 
-                FROM User 
-                WHERE Id = :UserInfo.getUserId() 
-                LIMIT 1
-            ];
-            
-            String userRoleName = currentUser.UserRole?.DeveloperName ?? '';
-            
+            User currentUser = [SELECT Id, UserRole.DeveloperName, UserRole.Name FROM User WHERE Id = :UserInfo.getUserId() LIMIT 1];
+            String userRoleName = currentUser.UserRole?.Name ?? '';
+            System.debug('Current User Role: ' + userRoleName);
+
             Id purchaseOrderRecordTypeId = Schema.SObjectType.Order.getRecordTypeInfosByDeveloperName()
                 .get('Purchase_Order').getRecordTypeId();
-            
+            System.debug('Purchase Order RecordTypeId: ' + purchaseOrderRecordTypeId);
+
             List<Order> orders = new List<Order>();
             
             switch on userRoleName {
-                when 'Managing_Director' {
+                when 'National Head, Key Accounts Private' {
+                    System.debug('Fetching orders for National Head, Key Accounts Private');
                     orders = [
                         SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
-                               Account.Name, Approval_Status__c, Product_Type__c
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
                         FROM Order
                         WHERE RecordTypeId = :purchaseOrderRecordTypeId
-                        AND Product_Type__c IN ('Modules', 'Water Pump')
+                        AND ((Type__c = 'Key Account Private' AND (BillingCountry = 'India' OR ShippingCountry = 'India'))
+                            OR (Type__c = 'Key Account Government' AND Product_Type__c = 'Modules'))
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
                     ];
                 }
-                when 'National_Head_Key_Accounts_Private' {
+                when 'Key Accounts International Head Private' {
+                    System.debug('Fetching orders for Key Accounts International Head Private');
                     orders = [
                         SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
-                               Account.Name, Approval_Status__c, Product_Type__c
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
                         FROM Order
                         WHERE RecordTypeId = :purchaseOrderRecordTypeId
-                        AND Product_Type__c = 'Modules'
+                        AND Type__c = 'Key Account Private'
+                        AND (BillingCountry != 'India' AND ShippingCountry != 'India')
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
                     ];
                 }
-                when 'Chief_Strategy_Officer' {
+                when 'East Region Head, Channel Sales' {
+                    System.debug('Fetching orders for East Region Head, Channel Sales');
                     orders = [
                         SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
-                               Account.Name, Approval_Status__c, Product_Type__c
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
                         FROM Order
                         WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Type__c = 'Channel Sales'
+                        AND Region__c LIKE '%East%'
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
+                    ];
+                }
+                when 'North Region Head, Channel Sales' {
+                    System.debug('Fetching orders for North Region Head, Channel Sales');
+                    orders = [
+                        SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
+                        FROM Order
+                        WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Type__c = 'Channel Sales'
+                        AND Region__c LIKE '%North%'
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
+                    ];
+                }
+                when 'South Region Head, Channel Sales' {
+                    System.debug('Fetching orders for South Region Head, Channel Sales');
+                    orders = [
+                        SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
+                               Account.Name, Type__c, Reason_For_Rejection__c,Status, Grand_Total__c
+                        FROM Order
+                        WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Type__c = 'Channel Sales'
+                        AND Region__c LIKE '%South%'
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
+                    ];
+                }
+                when 'West Region Head, Channel Sales' {
+                    System.debug('Fetching orders for West Region Head, Channel Sales');
+                    orders = [
+                        SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
+                        FROM Order
+                        WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Type__c = 'Channel Sales'
+                        AND Region__c LIKE '%West%'
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
+                    ];
+                }
+                when 'Chief Strategy Officer' {
+                    System.debug('Fetching orders for Chief Strategy Officer');
+                    orders = [
+                        SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
+                        FROM Order
+                        WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Type__c = 'Key Account Government'
                         AND Product_Type__c = 'EPC'
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
                     ];
                 }
-                when 'Government_Projects_Solar_Pumps_1' {
+                when 'Government Projects - Solar Pumps 1' {
+                    System.debug('Fetching orders for Government Projects - Solar Pumps 1');
                     orders = [
                         SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
-                               Account.Name, Approval_Status__c, Product_Type__c
+                               Account.Name, Type__c, Reason_For_Rejection__c, Status, Grand_Total__c
                         FROM Order
                         WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Type__c = 'Key Account Government'
                         AND Product_Type__c = 'Water Pump'
-                    ];
-                }
-                when 'CEO' {
-                    orders = [
-                        SELECT Id, OrderNumber, TotalAmount, Total_Capacity_in_MWp__c,
-                               Account.Name, Approval_Status__c, Product_Type__c
-                        FROM Order
-                        WHERE RecordTypeId = :purchaseOrderRecordTypeId
+                        AND Approval_Status__c = null
+                        AND Status = 'Draft'
                     ];
                 }
                 when else {
+                    System.debug('No matching user role. Returning empty order list.');
                     orders = new List<Order>();
                 }
             }
-            
+
+            System.debug('Number of orders fetched: ' + orders.size());
             result.put('orders', orders);
             result.put('userRoleName', userRoleName);
             return result;
             
         } catch(Exception e) {
+            System.debug('Exception in getPurchaseOrders: ' + e.getMessage());
             throw new AuraHandledException('Error fetching purchase orders: ' + e.getMessage());
         }
     }
     
-    // Update approval status
     @AuraEnabled
-    public static void updateApprovalStatus(Id orderId, String status) {
+    public static void updateApprovalStatus(Id orderId, String status, String rejectionReason) {
         try {
-            Order ord = [SELECT Id, Approval_Status__c FROM Order WHERE Id = :orderId LIMIT 1];
+            System.debug('Updating approval status for Order ID: ' + orderId);
+            System.debug('New status: ' + status);
+            System.debug('Rejection reason: ' + rejectionReason);
+
+            Order ord = [SELECT Id, Approval_Status__c, Reason_For_Rejection__c FROM Order WHERE Id = :orderId LIMIT 1];
             ord.Approval_Status__c = status;
+
+            if (status == 'Rejected') {
+                ord.Reason_For_Rejection__c = rejectionReason;
+                System.debug('Setting rejection reason.');
+            } else {
+                ord.Reason_For_Rejection__c = null;
+                System.debug('Clearing rejection reason.');
+            }
+
             update ord;
+            System.debug('Order updated successfully.');
+
         } catch(Exception e) {
+            System.debug('Exception in updateApprovalStatus: ' + e.getMessage());
             throw new AuraHandledException('Error updating approval status: ' + e.getMessage());
-        }
-    }
-
-    // Fetch pending module orders
-    @AuraEnabled(cacheable=true)
-    public static List<Order> getPendingModuleOrders() {
-        return [
-            SELECT Id, Name, Product_Type__c, Approval_Status__c
-            FROM Order
-            WHERE Product_Type__c = 'Modules' AND Approval_Status__c = null
-        ];
-    }
-
-    // Get users by role developer name
-    @AuraEnabled(cacheable=true)
-    public static List<User> getUsersByRoleDeveloperName(String roleDevName) {
-        return [
-            SELECT Id, Name, UserRole.DeveloperName
-            FROM User
-            WHERE UserRole.DeveloperName = :roleDevName AND IsActive = true 
-        ];
-    }
-
-    // Approve order by National Head
-    @AuraEnabled
-    public static void approveOrderByNationalHead(Id orderId, Id approverId) {
-        Order ord = [SELECT Id, Product_Type__c, Approval_Status__c FROM Order WHERE Id = :orderId LIMIT 1];
-        
-        if(ord.Product_Type__c == 'Modules' && ord.Approval_Status__c == null) {
-            User approver = [SELECT Id, UserRole.DeveloperName FROM User WHERE Id = :approverId LIMIT 1];
-
-            if(approver.UserRole != null && approver.UserRole.DeveloperName == 'National_Head_Key_Accounts_Private') {
-                ord.Approval_Status__c = 'Approved';
-                update ord;
-
-                List<User> mds = getUsersByRoleDeveloperName('Managing_Director');
-                if(!mds.isEmpty()) {
-                    System.debug('Order assigned to MD: ' + mds[0].Name);
-                }
-            } else {
-                throw new AuraHandledException('Approver is not authorized as National Head.');
-            }
-        } else {
-            throw new AuraHandledException('Order not eligible for National Head approval.');
-        }
-    }
-
-    // Final decision by MD
-    @AuraEnabled
-    public static void finalDecisionByMD(Id orderId, Id approverId, String decision) {
-        if(decision != 'Approved' && decision != 'Rejected') {
-            throw new AuraHandledException('Invalid decision. Must be Approved or Rejected.');
-        }
-
-        Order ord = [SELECT Id, Product_Type__c, Approval_Status__c FROM Order WHERE Id = :orderId LIMIT 1];
-
-        if(ord.Product_Type__c == 'Modules' && ord.Approval_Status__c == 'Approved') {
-            User approver = [SELECT Id, UserRole.DeveloperName FROM User WHERE Id = :approverId LIMIT 1];
-
-            if(approver.UserRole != null && approver.UserRole.DeveloperName == 'Managing_Director') {
-                ord.Approval_Status__c = decision;
-                update ord;
-            } else {
-                throw new AuraHandledException('Approver not authorized as Managing Director.');
-            }
-        } else {
-            throw new AuraHandledException('Order not eligible for MD decision.');
         }
     }
 }

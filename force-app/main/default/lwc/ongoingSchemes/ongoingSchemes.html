@@ -1,23 +1,18 @@
 <template>
     <template if:true={promos}>
-        <div >
-            <h1  style="text-align: center;font-size: 16px;font-weight: bold;">
-                Ongoing Schemes
-            </h1>
+        <h1 style="text-align: center; font-size: 16px; font-weight: bold;">
+            Ongoing Schemes
+        </h1><br>
+        <div class="scroll">
             <template for:each={promos} for:item="promo">
-                <div key={promo.Id} style="padding: 10px;">
-                    <p style="font-size: 16px;">{promo.Ongoing_Schemes__c}</p>
-                    <!-- <marquee class="marq" bgcolor="Grey"  direction="left" loop="">
-                    <p>{promo.Ongoing_Schemes__c}</p>
-                    </marquee> -->
+                <div key={promo.Id} class="promo-card">
+                    <h2>{promo.Name}</h2>
+                    <lightning-formatted-rich-text value={promo.pointsAsHTML}></lightning-formatted-rich-text>
                 </div>
             </template>
         </div>
     </template>
-
     <template if:true={error}>
-        <div class="slds-text-color_error">
-            Error loading promos: {error.body.message}
-        </div>
+        <p class="error">{error}</p>
     </template>
 </template>

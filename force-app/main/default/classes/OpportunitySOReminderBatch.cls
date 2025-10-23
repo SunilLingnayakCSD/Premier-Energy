@@ -4,8 +4,7 @@ public class OpportunitySOReminderBatch implements Database.Batchable<SObject>, 
         return Database.getQueryLocator([
             SELECT Id, Name, Customer_Name__c,StageName,Tender_Name__c, Product_Type__c,RecordType.Developername, Scheme_Name__c, Region_Head_Email__c
             FROM Opportunity
-            WHERE 
-            Id NOT IN (SELECT OpportunityId FROM Order)
+            WHERE Id NOT IN (SELECT OpportunityId FROM Order)
             AND Region_Head_Email__c != null
             AND StageName = 'Closed Won'
             AND RecordType.Developername = 'Key_Account_Government'
@@ -64,8 +63,7 @@ public class OpportunitySOReminderBatch implements Database.Batchable<SObject>, 
             Messaging.SingleEmailMessage mail = createEmailMessage(
                 'Reminder for Sending for SO Creation',
                 body,
-                regionalEmails.split(','),
-                new List<String>()
+                regionalEmails.split(',')
             );
 
             if (mail != null) {
@@ -78,13 +76,10 @@ public class OpportunitySOReminderBatch implements Database.Batchable<SObject>, 
         }
     }
 
-    private Messaging.SingleEmailMessage createEmailMessage(String subject, String body, List<String> toAddresses, List<String> ccAddresses) {
+    private Messaging.SingleEmailMessage createEmailMessage(String subject, String body, List<String> toAddresses) {
         try {
             Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
             email.setToAddresses(toAddresses);
-            if (!ccAddresses.isEmpty()) {
-                email.setCcAddresses(ccAddresses);
-            }
             email.setSubject(subject);
             email.setHtmlBody(body);
             email.setSenderDisplayName('Premier Energies');

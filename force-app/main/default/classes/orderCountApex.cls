@@ -1,31 +1,4 @@
-/**
-* @File Name : orderCountApex.cls
-* @Description :
-* @Author :
-* @Last Modified By :
-* @Last Modified On : April 15, 2025
-* @Modification Log :
-*==============================================================================
-* Ver | Date | Author | Modification
-*==============================================================================
-* 1.0 | April 15, 2025 |   | Initial Version
-**/
-
-/*public class orderCountApex {
-    @AuraEnabled(cacheable=true)
-    public static List<Order> orderMethod(Date startdate, Date enddate) {
-        Id currentUserId = UserInfo.getUserId();
-        Date adjustedEndDate = enddate.addDays(1);
-        return [
-            SELECT Id
-            FROM Order
-            WHERE OwnerId = :currentUserId
-            AND CreatedDate >= :startdate
-            AND CreatedDate <:adjustedEndDate
-        ];
-    }
-}*/
-public with sharing class orderCountApex {
+public without sharing class orderCountApex {
     @AuraEnabled(cacheable=true)
     public static Map<String, Integer> orderMethod(Date startdate, Date enddate) {
         Id currentUserId = UserInfo.getUserId();

@@ -4,22 +4,20 @@ global without sharing class CreateOrder {
     global static List<ExternalOrderWrapper> getAllOrderDetails() {
         List<ExternalOrderWrapper> orderWrappers = new List<ExternalOrderWrapper>();
         
-         DateTime timeNow = System.now();
-        // Get the time 
-         DateTime X30MinutesAgo = timeNow.addMinutes(-30);
-        // Subtract 30 minutes from it
-        System.DEBUG([SELECT ID FROM Account WHERE createdDate <:timeNow AND createdDate >:X30MinutesAgo]);
+        Id salesOrderRecordTypeId = Schema.SObjectType.Order.getRecordTypeInfosByDeveloperName().get('Sales_Order').getRecordTypeId();
+        System.debug('salesOrderRecordTypeId'+salesOrderRecordTypeId);
 
         // Fetch Orders
         List<Order> orders = [
             SELECT Id, Name,OrderNumber, Status, CreatedDate, EffectiveDate, AccountId, Account.Name,
                    Distribution_Channel__c, Division__c, Incolocation__c, Incoterms__c,
-                   Payment_Terms__c, Plant__c, Sales_Org__c, Segment__c,
+                   Payment_Terms__c, Plant__c, Sales_Org__c, Segment1__c,
                    Bill_To_Customer_Code__c, Ship_To_Customer_Code__c, Shipping_Point__c,
-                   PoNumber,Product_type__c,Cust_Ref_Date__c
+                   PoNumber,Product_type__c,Cust_Ref_Date__c,Product_Category__c
             FROM Order
-            WHERE OrderNumber IN ('00000100', '00000116')
-          //  WHERE createdDate <:timeNow AND createdDate >:X30MinutesAgo
+           // WHERE OrderNumber IN ('00000261', '00000260')
+           WHERE SAP_Order_Id__c = null
+           AND RecordTypeId =: salesOrderRecordTypeId
         ];
 
         Set<Id> orderIds = new Set<Id>();
@@ -30,8 +28,8 @@ global without sharing class CreateOrder {
         // Fetch related Order Items
         Map<Id, List<OrderItem>> orderItemsMap = new Map<Id, List<OrderItem>>();
         for (OrderItem item : [
-            SELECT Id, Quantity, UnitPrice, Product2.Name, Description, OrderId,
-                   CurrencyIsoCode, Product2.Family,Material_Number__c,Segment__c
+            SELECT Id, Quantity, UnitPrice, Product2.Name,Product2.Product_Details_Technology_Type__c, Description, OrderId,
+                   CurrencyIsoCode, Product2.Family,Material_Number__c,Segment1__c,DCR_Non_DCR__c,Product2.Material_Number__c
             FROM OrderItem
             WHERE OrderId IN :orderIds
         ]) {
@@ -45,7 +43,7 @@ global without sharing class CreateOrder {
         for (Order ord : orders) {
             ExternalOrderWrapper wrapper = new ExternalOrderWrapper();
 
-			wrapper.Order_Type = 'ZDOR';
+            wrapper.Order_Type = 'ZDOR';
             wrapper.Sales_org = '2000';
             wrapper.Distribution_Channel = '10';
             wrapper.Division = '10'; // Default
@@ -57,21 +55,23 @@ global without sharing class CreateOrder {
             wrapper.Incoterms = ord.Incoterms__c;
             wrapper.Inco_Location = ord.Incolocation__c;
             wrapper.OrderNumber = ord.OrderNumber;
-            wrapper.productType= ord.Product_type__c;
+            wrapper.productType = ord.Product_Category__c;
+           // wrapper.DCR_NON_DCR = ord.DCR_Non_DCR__c;
             wrapper.Line_items = new List<LineItemWrapper>();
             
             List<OrderItem> items = orderItemsMap.get(ord.Id);
-		if (items != null) {
-    		for (OrderItem item : items) {
-       			wrapper.Line_items.add(new LineItemWrapper(
-                 item.Product2 != null ? item.Product2.Name : '',
-                 item.Segment__c,
+        if (items != null) {
+            for (OrderItem item : items) {
+                wrapper.Line_items.add(new LineItemWrapper(
+                 item.Product2 != null ? item.Product2.Product_Details_Technology_Type__c : '',
+                 item.Segment1__c,
                  item.Quantity,
                  ord.Plant__c,
                  ord.Shipping_Point__c,
                  item.UnitPrice,
                  item.CurrencyIsoCode,
-                 item.Material_Number__c
+                 item.Product2.Material_Number__c,
+                 item.DCR_Non_DCR__c
                  
           ));
        }
@@ -81,46 +81,6 @@ global without sharing class CreateOrder {
 
         return orderWrappers;
     }
-    
-    
-  /* @HttpPost
-global static String updateSAPOrderId() {
-    RestRequest req = RestContext.request;
-    String requestBody = req.requestBody.toString();
-    String message;
-
-    try {
-        // Parse incoming JSON
-        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(requestBody);
-
-        String orderNumber = (String) payload.get('OrderNumber');  // Use OrderNumber now
-        String sapOrderId = (String) payload.get('SAPOrderId');
-
-        if (String.isNotBlank(orderNumber) && String.isNotBlank(sapOrderId)) {
-            List<Order> matchingOrders = [
-                SELECT Id, SAP_Order_Id__c
-                FROM Order
-                WHERE OrderNumber = :orderNumber
-                LIMIT 1
-            ];
-
-            if (!matchingOrders.isEmpty()) {
-                Order ord = matchingOrders[0];
-                ord.SAP_Order_Id__c = sapOrderId;
-                update ord;
-                message = 'SAP Order ID updated successfully for OrderNumber: ' + orderNumber;
-            } else {
-                message = 'No matching Order found for OrderNumber: ' + orderNumber;
-            }
-        } else {
-            message = 'Missing OrderNumber or SAPOrderId in request.';
-        }
-    } catch (Exception e) {
-        message = 'Error occurred: ' + e.getMessage();
-    }
-
-    return message;
-} */
     
     @HttpPost
 global static Map<String, String> updateSAPOrderId() {
@@ -135,7 +95,7 @@ global static Map<String, String> updateSAPOrderId() {
 
         String orderNumber     = (String) payload.get('OrderNumber');
         String sapOrderId      = (String) payload.get('SAPOrderId');
-        String sapResponseMsg  = (String) payload.get('responseMessage'); // From SAP
+        String sapResponseMsg  = (String) payload.get('Message'); // From SAP
 
         if (String.isNotBlank(orderNumber) && String.isNotBlank(sapOrderId)) {
             List<Order> matchingOrders = [
@@ -183,6 +143,7 @@ global static Map<String, String> updateSAPOrderId() {
         public String Incoterms;
         public String Inco_Location;
         public String OrderNumber;
+       
         
         public String productType;
         public List<LineItemWrapper> Line_items;
@@ -195,12 +156,13 @@ global static Map<String, String> updateSAPOrderId() {
         public String Plant;
         public String Shipping_point;
         public Decimal Price;
-        public String segment;
+        public String Segment;
         public String currencyVal;
+        public String DCR_NON_DCR;
 
         global LineItemWrapper(
-             String productName,String segment, Decimal qty, String plant, String shipPoint,
-            Decimal price,String currencyVal,String Material
+             String productName,String Segment, Decimal qty, String plant, String shipPoint,
+            Decimal price,String currencyVal,String Material,String DCR_NON_DCR
         ) {
            // this.Material_Number__c = material;
             this.Product = productName;
@@ -209,8 +171,9 @@ global static Map<String, String> updateSAPOrderId() {
             this.Shipping_point = shipPoint;
             this.Price = price;
             this.currencyVal = currencyVal; 
-            this.segment = segment;
+            this.Segment = Segment;
             this.Material = Material;
+            this.DCR_NON_DCR = DCR_NON_DCR;
         }
     }
 }

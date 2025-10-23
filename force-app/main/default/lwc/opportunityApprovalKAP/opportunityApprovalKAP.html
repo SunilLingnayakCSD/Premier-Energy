@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title="Pipeline Opportunity Approval" icon-name="standard:opportunity">
+        <div class="slds-m-around_medium">
+            <template if:true={isLoading}>
+                <div class="slds-is-relative" style="height: 100px;">
+                    <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+                </div>
+            </template>
+            <template if:false={isLoading}>
+                <template if:true={opportunities.length}>
+                    <lightning-datatable
+                        key-field="Id"
+                        data={opportunities}
+                        columns={columns}
+                        hide-checkbox-column
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </template>
+                <template if:false={opportunities.length}>
+                    <div class="slds-box slds-theme_info slds-text-align_center slds-m-top_medium">
+                        <p class="slds-text-heading_small slds-text-color_default">
+                            <lightning-icon icon-name="utility:info" size="small" class="slds-m-right_x-small"></lightning-icon>
+                            No opportunities available for approval.
+                        </p>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

@@ -2,13 +2,16 @@ public without sharing class LeadConvertion {
     @InvocableMethod
     public static void convertLeads(List<Id> leadIds) {
         List<Lead> leads = [
-            SELECT Id, Company, FirstName, LastName, Email, OwnerId,LeadSource,Product_Type_KAPOrChannelSales__c,
-                   Customer_Registered_Country__c, Customer_Registered_State__c,Project_Capacity__c,
-                   Customer_Registered_City__c, Customer_Registered_Pincode__c,Lead_Capacity__c,
-                   DCR_Non_DCR__c, Delivery_required_by__c, Domestic_Exports__c,Wattage_Wp_Cell_Module__c,
-                   Plant_Name__c, Premier_Business_Entity__c, product__c, Street,Enquiry_or_RFQ_Documents__c,
-                   Total_Capacity_in_MWp__c, RecordType.DeveloperName, City, Country, PostalCode,
-                   Lead_Regional_Head_Email__c, Region_Picklist__c, Segment__c, State, Phone,Region_Customer_Operation__c
+            SELECT Id, Company, FirstName, LastName, Email, OwnerId,LeadSource,Product_Category__c,Government_Project__c,Owner.Email,
+                   Customer_Registered_Country__c, Customer_Registered_State__c,Project_Capacity__c,Other_Product_if_applicable__c,Location_of_the_project_site__c,
+                   Customer_Registered_City__c, Customer_Registered_Pincode__c,Lead_Capacity__c,Quantity1__c,Scheme_Name__c,Payment_Terms__c,
+                   DCR_Non_DCR1__c, Delivery_required_by__c, Domestic_Exports__c,Wattage_Wp_Cell_Module2__c,Segment_KAG__c,Installation_Completion_Date__c,
+                   Plant_Store_Name1__c, Premier_Business_Entity1__c, Product_Details_Technology_Type__c, Street,Enquiry_or_RFQ_Documents__c,Tender_Number__c,EMD_Amounts__c,
+                   Total_Capacity_in_MWp__c, RecordType.DeveloperName, City, Country, PostalCode,Delivery_Due_Date__c,Tender_Document__c,
+                   Lead_Regional_Head_Email__c,Scope_of_Supply__c,Region_Picklist__c, Segment1__c, State, Phone,Region_Customer_Operation__c,Credit_rating_of_Tenderer__c,
+                   Controller_Type__c,Pump_Type_AC_DC__c,Pump_Position__c,Water_Pumping_Systems_Quantity__c,Pump_Capacity_HP_1_HP_2HP_3_HP_5__c,
+                   Location_of_the_project_site__Street__s,Location_of_the_project_site__CountryCode__s,Location_of_the_project_site__PostalCode__s,Location_of_the_project_site__StateCode__s,
+                   Location_of_the_project_site__City__s
             FROM Lead WHERE Id IN :leadIds
         ];
  
@@ -65,7 +68,8 @@ public without sharing class LeadConvertion {
                 Account newAcc = new Account(
                     Name = ld.Company,
                     OwnerId = ld.OwnerId,
-                    Plant_Name__c = ld.Plant_Name__c,
+                    Email__c = ld.Email,
+                    Plant_Name__c = ld.Plant_Store_Name1__c,
                     BillingCity = ld.City,
                     BillingCountry = ld.Country,
                     BillingPostalCode = ld.PostalCode,
@@ -73,7 +77,7 @@ public without sharing class LeadConvertion {
                     BillingStreet = ld.Street,
                     Phone = ld.Phone,
                     AccountSource = ld.LeadSource,
-                    Premier_Business_Entity__c = ld.Premier_Business_Entity__c,
+                    Premier_Business_Entity__c = ld.Premier_Business_Entity1__c,
                     RecordTypeId = customerAccRT,
                     Total_Capacity_in_MWp__c = ld.Total_Capacity_in_MWp__c
                 );
@@ -155,38 +159,60 @@ public without sharing class LeadConvertion {
                 Name = ld.Lead_Capacity__c,
                 AccountId = acc != null ? acc.Id : null,
                 ContactId = con != null ? con.Id : null,
-                Customer_Name__c = ld.Lead_Capacity__c,
+                //Customer_Name__c = ld.Lead_Capacity__c,
                 CloseDate = Date.today().addDays(30),
-                StageName = ld.RecordType.DeveloperName == 'Key_Account_Government'? 'Contract Agreement': 'RFQ/Enquiry',
+                StageName = ld.RecordType.DeveloperName == 'Key_Account_Government'? 'Price Approval & Proposal Submission' : 'RFQ/Enquiry',
                 Customer_Registered_Address__c = String.join(new List<String>{
                     ld.Customer_Registered_Country__c, ld.Customer_Registered_State__c,
                     ld.Customer_Registered_City__c, ld.Customer_Registered_Pincode__c
                 }, ' ').trim(),
-                DCR_Non_DCR__c = ld.DCR_Non_DCR__c,
+                DCR_Non_DCR1__c = ld.DCR_Non_DCR1__c,
                 LeadSource = ld.LeadSource,
                 Enquiry_or_RFQ_Documents__c = ld.Enquiry_or_RFQ_Documents__c,
-                Delivery_Required_by__c = ld.Delivery_required_by__c,
+                Delivery_Required_by__c = ld.Delivery_Due_Date__c,
                 Domestic_Exports__c = ld.Domestic_Exports__c,
                 OwnerId = ld.OwnerId,
-                Plant_Name__c = ld.Plant_Name__c,
-                Premier_Business_Entity__c = ld.Premier_Business_Entity__c,
-                Product_Details__c = ld.product__c,
+                Scheme_Name__c = ld.Scheme_Name__c,
+                Plant_Store_Name__c = ld.Plant_Store_Name1__c,
+                TotalOpportunityQuantity = ld.Quantity1__c,
+                Premier_Business_Entity1__c = ld.Premier_Business_Entity1__c,
+                Product_Details_Technology_Type1__c = ld.Product_Details_Technology_Type__c,
                 Project_capacity_in_MWp_including_Spare__c = ld.Project_Capacity__c,
                 RecordTypeId = oppRecordTypeMap.get(ld.RecordType.DeveloperName),
-                Region_Head_Email__c = ld.Lead_Regional_Head_Email__c,
+                Region_Head_Email__c = ld.Owner.Email,
                 Region__c = ld.Region_Picklist__c,
-                Segment__c = ld.Segment__c,
-                Product_Category__c = ld.Product_Type_KAPOrChannelSales__c,
+                Product_Type__c = ld.Government_Project__c,
+                Segment1__c = ld.RecordType.DeveloperName == 'Key_Account_Government'? ld.Segment_KAG__c:ld.Segment1__c,
+                Delivery_To_Date__c = ld.Delivery_Due_Date__c,
+                Product_Category1__c = ld.Product_Category__c,
                 Region_Customer_Operation__c = ld.Region_Customer_Operation__c,
-                Wattage_Wp_Cell_Module_UAT__c = ld.Wattage_Wp_Cell_Module__c,
+                Wattage_Wp_Cell_Module1__c = ld.Wattage_Wp_Cell_Module2__c,
                 Project_Capacity_in_MWp__c = ld.Project_Capacity__c,
-                Product_Details_Technology_Type__c = ld.Product__c,
+                Tender_Number__c = ld.Tender_Number__c,
+                Tender_Document__c = ld.Tender_Document__c,
+                Credit_rating_of_Tenderer__c = ld.Credit_rating_of_Tenderer__c,
+                Installation_Completion_Due_Date__c = ld.Installation_Completion_Date__c,
+                EMD_Amounts__c = ld.EMD_Amounts__c,
+                Payment_Terms1__c = ld.Payment_Terms__c,
+                Pump_Capacity_HP__c = ld.Pump_Capacity_HP_1_HP_2HP_3_HP_5__c,
+                Pump_Position__c = ld.Pump_Position__c,
+                Pump_Type__c = ld.Pump_Type_AC_DC__c,
+                Water_Pumping_Systems_Quantity__c = ld.Water_Pumping_Systems_Quantity__c,
+                Controller_Type__c = ld.Controller_Type__c,
+                Scope_of_Supply__c = ld.Scope_of_Supply__c,
+                Location_of_the_project_site__Street__s  = ld.Location_of_the_project_site__Street__s,
+                Location_of_the_project_site__City__s    = ld.Location_of_the_project_site__City__s,
+                Location_of_the_project_site__StateCode__s   = ld.Location_of_the_project_site__StateCode__s,
+                Location_of_the_project_site__PostalCode__s = ld.Location_of_the_project_site__PostalCode__s,
+                Location_of_the_project_site__CountryCode__s = ld.Location_of_the_project_site__CountryCode__s,
+                //O_M_Period__c = ld.O_M_Period__c,
                 Customer_Type__c = 'New'
             );
             System.debug('AccountId--> '+ opp.AccountId);
  
             leadIdToOpportunity.put(ld.Id, opp);
             System.debug('Opp Stage--> '+ opp.StageName);
+            System.debug('opp wattage--> '+ opp.Wattage_Wp_Cell_Module1__c);
         }
  
         // Step 6: Convert leads

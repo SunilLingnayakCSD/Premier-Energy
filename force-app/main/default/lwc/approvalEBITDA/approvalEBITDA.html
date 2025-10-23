@@ -1,0 +1,795 @@
+<template>
+    <!-- National Head View -->
+    <template if:true={isNationalHead}>
+        <template if:true={allOpportunitiesforNH}>
+            <!-- Domestic Opportunities -->
+            <template if:true={hasDomesticModuleOppforNH}>
+                <lightning-card title="EBITDA-Based Opportunities" class="opportunity-card">
+                    <div class="table-container">
+                        <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                            <thead>
+                                <tr class="slds-text-title_caps">
+                                    <th>Opportunity Name</th>
+                                    <th>Type</th>
+                                    <th>Segment</th>
+                                    <th>System Price(INR)</th>
+                                    <th>KAM Proposed Price</th>
+                                    <th>EBITDA(%)</th>
+                                    <th class="actions-column">
+                                        &nbsp;&nbsp;<span>Approve</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span>Reject</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span>Escalate</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={allOpportunitiesforNH} for:item="opp">
+                                    <tr key={opp.Id}>
+                                        <td>
+                                            <a href={opp.recordUrl} class="record-link">{opp.Name}</a>
+                                        </td>
+                                        <td>{opp.DCR_Non_DCR1__c}</td>
+                                        <td>{opp.Segment1__c}</td>
+                                        <template if:false={opp.Discounted_Wp_Price__c}>
+                                            <td>{opp.Final_Wp_price__c}</td>
+                                        </template>
+                                        <template if:true={opp.Discounted_Wp_Price__c}>
+                                            <td></td>
+                                        </template>
+                                        <template if:true={opp.Discounted_Wp_Price__c}>
+                                            <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                        </template>
+                                        <template if:false={opp.Discounted_Wp_Price__c}>
+                                            <td></td>
+                                        </template>
+                                        <td>
+                                            <!-- For Manual EBITDA: editable via inline edit -->
+                                            <template if:true={opp.isManual}>
+                                                <template if:true={opp.isEditingEbitda}>
+                                                    <lightning-input type="number" variant="label-hidden"
+                                                        value={opp.Manual_EBIDTA__c} data-id={opp.Id}
+                                                        onchange={handleEbitaChange} onblur={saveUpdatedEbita}
+                                                        class="ebitda-input">
+                                                    </lightning-input>
+                                                </template>
+                                                <template if:false={opp.isEditingEbitda}>
+                                                    <div class="inline-edit-text" data-id={opp.Id}
+                                                        onclick={handleEbitdaClick}>
+                                                        {opp.Manual_EBIDTA__c}
+                                                    </div>
+                                                </template>
+                                            </template>
+
+                                            <!-- For Non-Manual EBITDA: show read-only -->
+                                            <template if:false={opp.isManual}>
+                                                <div class="inline-edit-text non-editable">
+                                                    {opp.New_EBITDA__c}
+                                                </div>
+                                            </template>
+
+                                        </td>
+
+                                        <td>
+                                            <div class="action-buttons">
+                                                <lightning-button variant="brand" label="Approve" title="Approve"
+                                                    onclick={handleApproveDomesticNH} data-id={opp.Id} disabled={isApproveByNH}
+                                                    class="slds-m-right_x-small">
+                                                </lightning-button>
+                                                <lightning-button variant="destructive" label="Reject" title="Reject"
+                                                    onclick={handleRejectDomesticNH} data-id={opp.Id} disabled={isRejectByNH}
+                                                    class="slds-m-right_x-small">
+                                                </lightning-button>
+                                                <lightning-button variant="neutral" label="Escalate" title="Escalate"
+                                                    onclick={handleEscalateDomesticNH} data-id={opp.Id} disabled={isEscalateByNH}>
+                                                </lightning-button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </lightning-card>
+            </template>
+
+            <!-- Cell Opportunities -->
+            <!--<template if:true={hasDomestCellOppforNH}>
+            <lightning-card title="Cell Opportunities" class="opportunity-card">
+                <div class="table-container">
+                    <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                        <thead>
+                            <tr class="slds-text-title_caps">
+                                <th>Opportunity Name</th>
+                                <th>Type</th>
+                                <th>Segment</th>
+                                <th>System Price(INR)</th>
+                                <th>KAM Proposed Price</th>
+                                <th>EBITDA(%)</th>
+                                <th class="action-column">
+                                    &nbsp;&nbsp;&nbsp;<span>Approve</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>Reject</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>Escalate</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={cellOppNH} for:item="opp">
+                                <tr key={opp.Id}>
+                                    <td>
+                                        <a href={opp.recordUrl} class="record-link">{opp.Name}</a>
+                                    </td>
+                                    <td>{opp.DCR_Non_DCR__c}</td>
+                                    <td>{opp.Segment__c}</td>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.Final_Wp_price__c}</td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                    </template>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <td>
+                                        <lightning-input type="number" variant="label-hidden"
+                                            value={opp.Manual_EBIDTA__c} data-id={opp.Id} onchange={handleEbitaChange}
+                                            class="ebitda-input">
+                                        </lightning-input>
+                                    </td>
+                                    <td>
+                                        <div class="actionn-buttons">
+                                            <lightning-button variant="brand" label="Approve" title="Approve"
+                                                onclick={handleApproveDomesticNH} data-id={opp.Id}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button variant="destructive" label="Reject" title="Reject"
+                                                onclick={handleRejectDomesticNH} data-id={opp.Id}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button variant="neutral" label="Escalate" title="Escalate"
+                                                onclick={handleEscalateDomesticNH} data-id={opp.Id} disabled={isEdited}>
+                                            </lightning-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <template if:true={isEdited}>
+                    <div class="save-button-container">
+                        <lightning-button label="Save Manual EBITDA" variant="brand" onclick={saveUpdatedEbita}
+                            disabled={isSaveEbitda} class="save-button">
+                        </lightning-button>
+                    </div>
+                </template>
+            </lightning-card>
+        </template>-->
+        </template>
+    </template>
+
+    <!-- International View -->
+    <template if:true={isInternational}>
+        <template if:true={hasInternationalOpp}>
+            <lightning-card title="EBITDA-Based Opportunities" class="opportunity-card">
+                <div class="table-container">
+                    <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                        <thead>
+                            <tr class="slds-text-title_caps">
+                                <th>Opportunity Name</th>
+                                <th>Type</th>
+                                <th>Segment</th>
+                                <th>System Price(INR)</th>
+                                <th>KAM Proposed Price</th>
+                                <th>EBITDA(%)</th>
+                                <th class="action-column">
+                                    &nbsp;&nbsp;&nbsp;<span>Approve</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>Reject</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>Escalate</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={internationalOpp} for:item="opp">
+                                <tr key={opp.Id}>
+                                    <td>
+                                        <a href={opp.recordUrl} class="record-link">{opp.Name}</a>
+                                    </td>
+                                    <td>{opp.DCR_Non_DCR1__c}</td>
+                                    <td>{opp.Segment1__c}</td>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.Final_Wp_price__c}</td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                    </template>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <td>
+                                        <!-- For Manual EBITDA: editable via inline edit -->
+                                        <template if:true={opp.isManual}>
+                                            <template if:true={opp.isEditingEbitda}>
+                                                <lightning-input type="number" variant="label-hidden"
+                                                    value={opp.Manual_EBIDTA__c} data-id={opp.Id}
+                                                    onchange={handleEbitaChange} onblur={saveUpdatedEbita}
+                                                    class="ebitda-input">
+                                                </lightning-input>
+                                            </template>
+                                            <template if:false={opp.isEditingEbitda}>
+                                                <div class="inline-edit-text" data-id={opp.Id}
+                                                    onclick={handleEbitdaClick}>
+                                                    {opp.Manual_EBIDTA__c}
+                                                </div>
+                                            </template>
+                                        </template>
+
+                                        <!-- For Non-Manual EBITDA: show read-only -->
+                                        <template if:false={opp.isManual}>
+                                            <div class="inline-edit-text non-editable">
+                                                {opp.New_EBITDA__c}
+                                            </div>
+                                        </template>
+
+                                    </td>
+                                    <td>
+                                        <div class="actionn-buttons">
+                                            <lightning-button variant="brand" label="Approve" title="Approve"
+                                                onclick={handleApproveDomesticNH} data-id={opp.Id} disabled={isApproveByNH}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button variant="destructive" label="Reject" title="Reject"
+                                                onclick={handleRejectDomesticNH} data-id={opp.Id} disabled={isRejectByNH}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button variant="neutral" label="Escalate" title="Escalate"
+                                                onclick={handleEscalateDomesticNH} data-id={opp.Id} disabled={isEscalateByNH}
+                                                >
+                                            </lightning-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- <template if:true={isEditedInter}>
+                    <div class="save-button-container">
+                        <lightning-button label="Save Manual EBITDA" variant="brand" onclick={saveUpdatedEbita}
+                            disabled={isSaveEbitda} class="save-button">
+                        </lightning-button>
+                    </div>
+                </template> -->
+            </lightning-card>
+        </template>
+    </template>
+
+    <!-- MD View -->
+    <template if:true={isMD}>
+        <!-- Domestic Opportunities for MD -->
+        <template if:true={hasDomestModuleOppforMD}>
+            <lightning-card title="EBITDA-Based Opportunities" class="opportunity-card">
+                <div class="table-container">
+                    <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                        <thead>
+                            <tr class="slds-text-title_caps">
+                                <th>Opportunity Name</th>
+                                <th>Type</th>
+                                <th>Segment</th>
+                                <th>System Price(INR)</th>
+                                <th>KAM Proposed Price</th>
+                                <th>EBITDA(%)</th>
+                                <th class="actions-column">
+                                    &nbsp;&nbsp;<span>Approve</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>Reject</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <!-- <span>Escalate</span> -->
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={allOpportunitiesforMD} for:item="opp">
+                                <tr key={opp.Id}>
+                                    <td>
+                                        <a href={opp.recordUrl} class="record-link">{opp.Name}</a>
+                                    </td>
+                                    <td>{opp.DCR_Non_DCR1__c}</td>
+                                    <td>{opp.Segment1__c}</td>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.Final_Wp_price__c}</td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                    </template>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <td>
+                                        <!-- For Manual EBITDA: editable via inline edit -->
+                                        <template if:true={opp.isManual}>
+                                            <template if:true={opp.isEditingEbitda}>
+                                                <lightning-input type="number" variant="label-hidden"
+                                                    value={opp.Manual_EBIDTA__c} data-id={opp.Id}
+                                                    onchange={handleEbitaChange} onblur={saveUpdatedEbita}
+                                                    class="ebitda-input">
+                                                </lightning-input>
+                                            </template>
+                                            <template if:false={opp.isEditingEbitda}>
+                                                <div class="inline-edit-text" data-id={opp.Id}
+                                                    onclick={handleEbitdaClick}>
+                                                    {opp.Manual_EBIDTA__c}
+                                                </div>
+                                            </template>
+                                        </template>
+
+                                        <!-- For Non-Manual EBITDA: show read-only -->
+                                        <template if:false={opp.isManual}>
+                                            <div class="inline-edit-text non-editable">
+                                                {opp.New_EBITDA__c}
+                                            </div>
+                                        </template>
+
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <lightning-button variant="brand" label="Approve" title="Approve"
+                                                onclick={handleApproveDomesticMD} data-id={opp.Id} disabled={isApproveByMD}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button variant="destructive" label="Reject" title="Reject"
+                                                onclick={handleRejectDomesticMD} data-id={opp.Id} disabled={isRejectByMD}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </lightning-card>
+        </template>
+
+        <!-- Cell Opportunities for MD -->
+        <!-- <template if:true={hasCellOppforMD}>
+            <lightning-card title="Cell Opportunities" class="opportunity-card">
+                <div class="table-container">
+                    <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                        <thead>
+                            <tr class="slds-text-title_caps">
+                                <th>Opportunity Name</th>
+                                <th>Type</th>
+                                <th>Segment</th>
+                                <th>System Price(INR)</th>
+                                <th>KAM Proposed Price</th>
+                                <th>EBITDA(%)</th>
+                                <th class="action-column">
+                                    &nbsp;&nbsp;&nbsp;<span>Approve</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span>Reject</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={cellOppMD} for:item="opp">
+                                <tr key={opp.Id}>
+                                    <td>
+                                        <a href={opp.recordUrl} class="record-link">{opp.Name}</a>
+                                    </td>
+                                    <td>{opp.DCR_Non_DCR__c}</td>
+                                    <td>{opp.Segment__c}</td>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.Final_Wp_price__c}</td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <template if:true={opp.Discounted_Wp_Price__c}>
+                                        <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                    </template>
+                                    <template if:false={opp.Discounted_Wp_Price__c}>
+                                        <td></td>
+                                    </template>
+                                    <td>
+                                        <lightning-input type="number" variant="label-hidden"
+                                            value={opp.Manual_EBIDTA__c} data-id={opp.Id} onchange={handleEbitaChange}
+                                            class="ebitda-input">
+                                        </lightning-input>
+                                    </td>
+                                    <td>
+                                        <div class="actionn-buttons">
+                                            <lightning-button variant="brand" label="Approve" title="Approve"
+                                                onclick={handleApproveDomesticMD} data-id={opp.Id}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                            <lightning-button variant="destructive" label="Reject" title="Reject"
+                                                onclick={handleRejectDomesticMD} data-id={opp.Id}
+                                                class="slds-m-right_x-small">
+                                            </lightning-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <template if:true={isEditedMD}>
+                    <div class="save-button-container">
+                        <lightning-button label="Save Manual EBITDA" variant="brand" onclick={saveUpdatedEbita}
+                            disabled={isSaveEbitda} class="save-button">
+                        </lightning-button>
+                    </div>
+                </template>
+            </lightning-card>
+        </template> -->
+    </template>
+
+    <!-- Modals -->
+    <template if:true={showRejectModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Reject Opportunity</h2>
+                </header>
+                <div class="slds-modal__content">
+                    <lightning-textarea label="Enter rejection comment" value={rejectComment}
+                        onchange={handleCommentChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Submit" onclick={submitReject}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showRejectModalforMD}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Reject Opportunity</h2>
+                </header>
+                <div class="slds-modal__content">
+                    <lightning-textarea label="Enter rejection comment" value={rejectComment}
+                        onchange={handleCommentChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Submit" onclick={submitRejectbyMD}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showEscalateModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Escalate Opportunity</h2>
+                </header>
+                <div class="slds-modal__content">
+                    <lightning-textarea label="Enter Escalate comment" value={escalateComment}
+                        onchange={handleEscalateCommentChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeEscalateModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Submit" onclick={submitEscalate}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>
+
+
+
+
+
+<!-- <template>
+    <template if:true={isNationalHead}>
+        <template if:true={hasDomesticModuleOppforNH}>
+            <lightning-card title="Domestic Opportunities">
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr>
+                            <th>Opportunity Name</th>
+                            <th>Type</th>
+                            <th>Segment</th>
+                            <th>KAM Proposed Price</th>
+                            <th>New EBITDA(%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={domesticOppNH} for:item="opp">
+                            <tr key={opp.Id}>
+                                <td>{opp.Name}</td>
+                                <td>{opp.DCR_Non_DCR__c}</td>
+                                <td>{opp.Segment__c}</td>
+                                <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                <td>{opp.New_EBITDA__c}</td>
+                                <td>
+                                    <lightning-button variant="brand" label="Approve" title="Approve"
+                                        onclick={handleApproveDomesticNH} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="destructive" label="Reject" title="Reject"
+                                        onclick={handleRejectDomesticNH} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="neutral" label="Escalate" title="Escalate"
+                                        onclick={handleEscalateDomesticNH} data-id={opp.Id}></lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </lightning-card>
+        </template>
+
+        <template if:true={hasDomestCellOppforNH}>
+            <lightning-card title="Cell Opportunities">
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr>
+                            <th>Opportunity Name</th>
+                            <th>Type</th>
+                            <th>Segment</th>
+                            <th>KAM Proposed Price</th>
+                            <th>Manual EBITDA(%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={cellOppNH} for:item="opp">
+                            <tr key={opp.Id}>
+                                <td>{opp.Name}</td>
+                                <td>{opp.DCR_Non_DCR__c}</td>
+                                <td>{opp.Segment__c}</td>
+                                <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                <td>
+                                    <lightning-input type="number" variant="label-hidden" value={opp.Manual_EBIDTA__c}
+                                        data-id={opp.Id} onchange={handleEbitaChange}>
+                                    </lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-button variant="brand" label="Approve" title="Approve"
+                                        onclick={handleApproveDomesticNH} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="destructive" label="Reject" title="Reject"
+                                        onclick={handleRejectDomesticNH} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="neutral" label="Escalate" title="Escalate"
+                                        onclick={handleEscalateDomesticNH} data-id={opp.Id} >
+                                    </lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <template if:true={isEdited}>
+                    <lightning-button label="Save Manual EBITDA" variant="brand" onclick={saveUpdatedEbita}
+                        class="slds-m-top_medium" disabled={isSaveEbitda}>
+                    </lightning-button>
+                </template>
+            </lightning-card>
+        </template>
+    </template>
+
+    <template if:true={isInternational}>
+        <template if:true={hasInternationalOpp}>
+            <lightning-card title="Export Opportunities">
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr>
+                            <th>Opportunity Name</th>
+                            <th>Type</th>
+                            <th>Segment</th>
+                            <th>KAM Proposed Price</th>
+                            <th>Manual EBITDA(%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={internationalOpp} for:item="opp">
+                            <tr key={opp.Id}>
+                                <td>{opp.Name}</td>
+                                <td>{opp.DCR_Non_DCR__c}</td>
+                                <td>{opp.Segment__c}</td>
+                                <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                <td>
+                                    <lightning-input type="number" variant="label-hidden" value={opp.Manual_EBIDTA__c}
+                                        data-id={opp.Id} onchange={handleEbitaChange}>
+                                    </lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-button variant="brand" label="Approve" title="Approve"
+                                        onclick={handleApproveDomesticNH} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="destructive" label="Reject" title="Reject"
+                                        onclick={handleRejectDomesticNH} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="neutral" label="Escalate" title="Escalate"
+                                        onclick={handleEscalateDomesticNH} data-id={opp.Id} disabled={isEditedInter}>
+                                    </lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <template if:true={isEditedInter}>
+                    <lightning-button label="Save Manual EBITDA" variant="brand" onclick={saveUpdatedEbita}
+                        class="slds-m-top_medium" disabled={isSaveEbitda}>
+                    </lightning-button>
+                </template>
+            </lightning-card>
+        </template>
+    </template>
+
+    <template if:true={showRejectModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Reject Opportunity</h2>
+                </header>
+                <div class="slds-modal__content">
+                    <lightning-textarea label="Enter rejection comment" value={rejectComment}
+                        onchange={handleCommentChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Submit" onclick={submitReject}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showRejectModalforMD}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Reject Opportunity</h2>
+                </header>
+                <div class="slds-modal__content">
+                    <lightning-textarea label="Enter rejection comment" value={rejectComment}
+                        onchange={handleCommentChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Submit" onclick={submitRejectbyMD}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showEscalateModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Escalate Opportunity</h2>
+                </header>
+                <div class="slds-modal__content">
+                    <lightning-textarea label="Enter Escalate comment" value={escalateComment}
+                        onchange={handleEscalateCommentChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeEscalateModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Submit" onclick={submitEscalate}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={isMD}>
+        <template if:true={hasDomestModuleOppforMD}>
+            <lightning-card title="Domestic Opportunities">
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr>
+                            <th>Opportunity Name</th>
+                            <th>Type</th>
+                            <th>Segment</th>
+                            <th>KAM Proposed Price</th>
+                            <th>New EBITDA(%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={domesticOppMD} for:item="opp">
+                            <tr key={opp.Id}>
+                                <td>{opp.Name}</td>
+                                <td>{opp.DCR_Non_DCR__c}</td>
+                                <td>{opp.Segment__c}</td>
+                                <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                <td>{opp.New_EBITDA__c}</td>
+                                <td>
+                                    <lightning-button variant="brand" label="Approve" title="Approve"
+                                        onclick={handleApproveDomesticMD} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="destructive" label="Reject" title="Reject"
+                                        onclick={handleRejectDomesticMD} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </lightning-card>
+        </template>
+
+        <template if:true={hasCellOppforMD}>
+            <lightning-card title="Cell Opportunities">
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr>
+                            <th>Opportunity Name</th>
+                            <th>Type</th>
+                            <th>Segment</th>
+                            <th>KAM Proposed Price</th>
+                            <th>Manual EBITDA(%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={cellOppMD} for:item="opp">
+                            <tr key={opp.Id}>
+                                <td>{opp.Name}</td>
+                                <td>{opp.DCR_Non_DCR__c}</td>
+                                <td>{opp.Segment__c}</td>
+                                <td>{opp.KAM_Proposed_Unit__c} {opp.Discounted_Wp_Price__c}</td>
+                                <td>
+                                    <lightning-input type="number" variant="label-hidden" value={opp.Manual_EBIDTA__c}
+                                        data-id={opp.Id} onchange={handleEbitaChange}>
+                                    </lightning-input>
+                                </td>
+                                <td>
+                                    <lightning-button variant="brand" label="Approve" title="Approve"
+                                        onclick={handleApproveDomesticMD} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    <lightning-button variant="destructive" label="Reject" title="Reject"
+                                        onclick={handleRejectDomesticMD} data-id={opp.Id} class="slds-m-right_small"
+                                        disabled={opp.isButtonDisabled}>
+                                    </lightning-button>
+                                    
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <template if:true={isEditedMD}>
+                    <lightning-button label="Save Manual EBITDA" variant="brand" onclick={saveUpdatedEbita}
+                        class="slds-m-top_medium" disabled={isSaveEbitda}>
+                    </lightning-button>
+                </template>
+            </lightning-card>
+        </template>
+    </template>
+
+</template> -->

@@ -1,9 +1,23 @@
 <template>
     <template if:true={isLastPage}>
-    <div class="updatebutton">
-        <lightning-button label="Update" onclick={handleupdate} variant="brand" class="slds-m-right_small">
+        <div class="updatebutton">
+            <template if:true={seeFinalOnly}>
+            <lightning-button label="Update" onclick={handleupdate} variant="brand" class="slds-m-right_small"
+                disabled={isAlreadyUpdatedbyKam}>
             </lightning-button>
-    </div>
+            </template>
+            <template if:true={isEditable}>
+            <lightning-button label="Update" onclick={handleupdate} variant="brand" class="slds-m-right_small"
+                disabled={isgrayoutforNHfun}>
+            </lightning-button>
+            </template>
+            <template if:false={seeFinalOnly}>
+                <lightning-button label="Attach" onclick={handleCreateAttachment} variant="brand"
+                    class="slds-m-right_small" disabled={isDisabled}>
+                </lightning-button>
+            </template>
+        </div>
+
     </template>
     <template if:false={seeFinalOnly}>
 
@@ -43,12 +57,12 @@
         <div class="slds-grid slds-gutters slds-m-bottom_medium">
             <div class="slds-col slds-size_1-of-2">
                 <lightning-combobox label="Country Source" value={countrySource} options={countryOptions}
-                    onchange={handleCountryChange} disabled={isDisabled}>
+                    onchange={handleCountryChange} disabled={isgrayoutforNHfun}>
                 </lightning-combobox>
             </div>
             <div class="slds-col slds-size_1-of-2">
                 <lightning-combobox label="Pricing Type" value={pricingType} options={pricingOptions}
-                    onchange={handlePricingChange} disabled={isDisabled}>
+                    onchange={handlePricingChange} disabled={isgrayoutforNHfun}>
                 </lightning-combobox>
             </div>
         </div>
@@ -84,7 +98,7 @@
                                             <div class="combobox-wrapper">
                                                 <lightning-combobox name={material.rawMaterialId}
                                                     data-id={material.dataId} value={material.selectedVariantId}
-                                                    options={material.variantOptions} onchange={handleVariantChange}>
+                                                    options={material.variantOptions} onchange={handleVariantChange} disabled={isgrayoutforNHfun}>
                                                 </lightning-combobox>
                                             </div>
                                         </template>

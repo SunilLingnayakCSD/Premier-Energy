@@ -1,0 +1,100 @@
+<template>
+    <lightning-card title="State Pricing Management" icon-name="standard:address">
+        <div class="slds-p-around_medium">
+            <!-- Update Section -->
+            <div class="slds-box slds-theme_default slds-m-bottom_medium">
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-combobox
+                            label="Select State"
+                            value={selectedState}
+                            options={stateOptions}
+                            onchange={handleStateChange}
+                            required>
+                        </lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input
+                            label="New Price per Km"
+                            type="number"
+                            formatter="currency"
+                            step="0.01"
+                            min="0"
+                            value={newPrice}
+                            onchange={handlePriceChange}
+                            required>
+                        </lightning-input>
+                    </div>
+                </div>
+                
+                <div class="slds-align_absolute-center slds-m-top_medium">
+                    <lightning-button
+                        label="Update All Records"
+                        variant="brand"
+                        onclick={handleUpdate}
+                        disabled={isButtonDisabled}>
+                    </lightning-button>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <template if:true={isLoading}>
+                <div class="slds-align_absolute-center">
+                    <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+                </div>
+            </template>
+            
+            <!-- State Averages Table -->
+            <div class="slds-box">
+                <h2 class="slds-text-heading_medium slds-m-bottom_medium">State Pricing Averages</h2>
+                
+                <div class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_striped">
+                    <table class="slds-table" role="grid">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col" class="slds-text-title_caps">
+                                    <div class="slds-truncate">State</div>
+                                </th>
+                                <th scope="col" class="slds-text-title_caps slds-text-align_right">
+                                    <div class="slds-truncate">Price/Km</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={stateAverages} for:item="state">
+                                <tr key={state.state} class="slds-hint-parent">
+                                    <td data-label="State">
+                                        <div class="slds-truncate">{state.state}</div>
+                                    </td>
+                                    <td data-label="Average Price" class="slds-text-align_right">
+                                        <div class="slds-truncate">
+                                            <lightning-formatted-number 
+                                                value={state.averagePrice} 
+                                                format-style="currency" 
+                                                currency-code="INR"
+                                                maximum-fraction-digits="2">
+                                            </lightning-formatted-number>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                        <tfoot>
+                            <tr class="grand-total slds-text-title_bold">
+                                <td>Grand Total</td>
+                                <td class="slds-text-align_right">
+                                    <lightning-formatted-number 
+                                        value={overallAverage} 
+                                        format-style="currency" 
+                                        currency-code="INR"
+                                        maximum-fraction-digits="2">
+                                    </lightning-formatted-number>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

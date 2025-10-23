@@ -1,56 +1,103 @@
 <template>
-    <lightning-card title="Lead Approval" icon-name="standard:lead">
-        <div class="slds-m-around_medium">
-            <template if:true={leads}>
+       <!-- Tender Table (Visible to all roles if data exists) -->
+       <div class="slds-m-bottom_medium">
+        <lightning-card title="Tender Participation Requests">
+    <template if:true={tenderLeads}>
+       
+            <lightning-datatable
+                key-field="Id"
+                data={tenderLeads}
+                columns={columnsTender}
+                hide-checkbox-column="true"
+                onrowaction={handleRowAction}>
+            </lightning-datatable>
+       
+    </template>
+     <template if:false={hasTenderLeads}>
+                <div class="slds-p-around_medium slds-text-color_weak slds-text-align_center">
+                    No Leads Available for Approval.
+                </div>
+        </template>
+         </lightning-card>
+       </div>
+       
+
+    <!-- Pre-Qualification Table (Only for National Head) -->
+    <template if:true={isNationalHead}>
+         <lightning-card title="Pre Qualification Requests">
+        <template if:true={preQualificationLeads}>
+           
                 <lightning-datatable
                     key-field="Id"
-                    data={leads}
-                    columns={columns}
+                    data={preQualificationLeads}
+                    columns={columnsPreQualification}
                     hide-checkbox-column="true"
                     onrowaction={handleRowAction}>
                 </lightning-datatable>
-            </template>
-            <template if:false={leads}>
-                <div class="slds-box slds-theme_info slds-text-align_center slds-m-top_medium">
-                    <p class="slds-text-heading_small slds-text-color_default">
-                        <lightning-icon icon-name="utility:info" size="small" class="slds-m-right_x-small"></lightning-icon>
-                        No Leads available for approval.
-                    </p>
-                </div>
-            </template>
-        </div>
-    </lightning-card>
+          
+        </template>
+        <template if:false={preQualificationLeads.length}>
 
-    <!-- Rejection Modal -->
+                <div class="slds-p-around_medium slds-text-color_weak slds-text-align_center">
+                    No Leads Available for Approval.
+                </div>
+        </template>
+          </lightning-card>
+    </template>
+
+    <!-- Reject Modal -->
     <template if:true={isRejectModalOpen}>
-        <section role="dialog" class="slds-modal slds-fade-in-open">
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container">
                 <header class="slds-modal__header">
-                    <h2 class="slds-text-heading_medium">Reject Lead</h2>
-                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeRejectModal}>
-                        <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
-                    </button>
+                    <h2 class="slds-text-heading_medium">Rejection Reason</h2>
                 </header>
                 <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-combobox 
-                        label="Rejection Reason" 
-                        value={selectedRejectionReason} 
-                        placeholder="Select a reason"
+                    <lightning-combobox
+                        name="rejectionReason"
+                        label="Select Reason"
+                        value={selectedRejectionReason}
+                        placeholder="Choose a reason"
                         options={rejectionReasons}
                         onchange={handleRejectionReasonChange}>
                     </lightning-combobox>
 
                     <template if:true={showOtherReasonField}>
-                        <lightning-textarea 
-                            label="Other Reason" 
-                            value={rejectionReason} 
+                        <lightning-textarea
+                            name="otherReason"
+                            label="Other Reason"
+                            value={rejectionReason}
                             onchange={handleReasonChange}>
                         </lightning-textarea>
                     </template>
                 </div>
                 <footer class="slds-modal__footer">
                     <lightning-button variant="neutral" label="Cancel" onclick={closeRejectModal}></lightning-button>
-                    <lightning-button variant="destructive" label="Reject" onclick={confirmReject} class="slds-m-left_medium"></lightning-button>
+                    <lightning-button variant="destructive" label="Reject" onclick={confirmReject}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- On Hold Modal -->
+    <template if:true={isOnHoldModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Reason for On Hold</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea
+                        name="onHoldReason"
+                        label="Enter Reason"
+                        value={onHoldReason}
+                        onchange={handleOnHoldReasonChange}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeOnHoldModal}></lightning-button>
+                    <lightning-button variant="brand" label="Confirm" onclick={confirmOnHold}></lightning-button>
                 </footer>
             </div>
         </section>

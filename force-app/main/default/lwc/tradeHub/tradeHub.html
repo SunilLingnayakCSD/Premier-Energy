@@ -1,11 +1,9 @@
 <template>
     <h1 style="color: green;font-weight:bold;">TURNOVER DISCOUNT SECTION</h1>
     
-   
     <lightning-layout horizontal-align="small" multiple-rows="true">
         <div style="display: flex;flex-direction:row;justify-content:space-around;">
             <div>
-            <lightning-layout-item padding="around-small" flexibility="auto">
                 <lightning-input
                     label="Summary from"
                     type="date"
@@ -13,14 +11,9 @@
                     class="input"
                     value={date1}
                     onchange={handleDateChange}>
-                    
                 </lightning-input>
-               
-            </lightning-layout-item>
-        </div>
-
-           <div>
-            <lightning-layout-item padding="around-small" flexibility="auto">
+            </div>
+            <div>
                 <lightning-input
                     label="Summary To"
                     type="date"
@@ -29,26 +22,24 @@
                     value={date2}
                     onchange={handleDateChange}>
                 </lightning-input>
-               
-            </lightning-layout-item>
+            </div>
         </div>
-        </div>
-        </lightning-layout>
+    </lightning-layout>
 
+    <!-- Monthly TOD Section -->
     <template if:true={monthlyData}>
         <h1>MONTHLY TOD PAYOUT:</h1>
         <template if:true={monthlyData.length}>
-            <div class="header-row" >
-                <div>SR NO.</div><div>PRODUCT</div><div>TARGET</div><div>ACHIEVED</div><div>ADDITIONAL SALES</div><div>PAYOUT AMOUNT</div>
+            <div class="header-row">
+                <div>PERIOD</div><div>SR NO.</div><div>TARGET (MWp)</div><div>ACTUAL SALES (MWp)</div><div>PAYOUT AMOUNT</div>
             </div>
             <template for:each={monthlyData} for:item="item">
-                <div class="data-row" key={item.Id}>
+                <div class="data-row" key={item.serialNumber}>
+                    <div>{item.periodLabel}</div>
                     <div>{item.serialNumber}</div>
-                    <div>{item.Product__r.Name}</div>
-                    <div>{item.Target_Unit__c}</div>
-                    <div>{item.Achieved__c}</div>
-                    <div>{item.Additional_Sales__c}</div>
-                    <div>{item.Net_Payout__c}</div>
+                    <div>{item.matchedTarget}</div>
+                    <div>{item.totalActualMwp}</div>
+                    <div>{item.netPayout}</div>
                 </div>
             </template>
         </template>
@@ -56,23 +47,21 @@
             <p style="padding: 10px; color: gray;">No monthly data available. (Not Applicable)</p>
         </template>
     </template>
-    
 
+    <!-- Quarterly TOD Section -->
     <template if:true={quarterlyData}>
         <h1>QUARTERLY TOD PAYOUT:</h1>
         <template if:true={quarterlyData.length}>
             <div class="header-row">
-                <div>SR NO.</div><div>PRODUCT</div><div>TARGET</div><div>ACHIEVED</div><div>ADDITIONAL SALES</div><div>PAYOUT AMOUNT</div>
+                <div>PERIOD</div><div>SR NO.</div><div>TARGET (MWp)</div><div>ACTUAL SALES (MWp)</div><div>PAYOUT AMOUNT</div>
             </div>
-            <!-- table header and rows like above -->
             <template for:each={quarterlyData} for:item="item">
-                <div class="data-row" key={item.Id}>
+                <div class="data-row" key={item.serialNumber}>
+                    <div>{item.periodLabel}</div>
                     <div>{item.serialNumber}</div>
-                    <div>{item.Product__r.Name}</div>
-                    <div>{item.Target_Unit__c}</div>
-                    <div>{item.Achieved__c}</div>
-                    <div>{item.Additional_Sales__c}</div>
-                    <div>{item.Net_Payout__c}</div>
+                    <div>{item.matchedTarget}</div>
+                    <div>{item.totalActualMwp}</div>
+                    <div>{item.netPayout}</div>
                 </div>
             </template>
         </template>
@@ -80,22 +69,21 @@
             <p style="padding: 10px; color: gray;">No quarterly data available. (Not Applicable)</p>
         </template>
     </template>
-    
+
+    <!-- Yearly TOD Section -->
     <template if:true={yearlyData}>
         <h1>YEARLY TOD PAYOUT:</h1>
         <template if:true={yearlyData.length}>
             <div class="header-row">
-                <div>SR NO.</div><div>PRODUCT</div><div>TARGET</div><div>ACHIEVED</div><div>ADDITIONAL SALES</div><div>PAYOUT AMOUNT</div>
+                <div>PERIOD</div><div>SR NO.</div><div>TARGET (MWp)</div><div>ACTUAL SALES (MWp)</div><div>PAYOUT AMOUNT</div>
             </div>
-            <!-- table header and rows like above -->
             <template for:each={yearlyData} for:item="item">
-                <div class="data-row" key={item.Id}>
+                <div class="data-row" key={item.serialNumber}>
+                    <div>{item.periodLabel}</div>
                     <div>{item.serialNumber}</div>
-                    <div>{item.Product__r.Name}</div>
-                    <div>{item.Target_Unit__c}</div>
-                    <div>{item.Achieved__c}</div>
-                    <div>{item.Additional_Sales__c}</div>
-                    <div>{item.Net_Payout__c}</div>
+                    <div>{item.matchedTarget}</div>
+                    <div>{item.totalActualMwp}</div>
+                    <div>{item.netPayout}</div>
                 </div>
             </template>
         </template>
@@ -103,89 +91,29 @@
             <p style="padding: 10px; color: gray;">No yearly data available. (Not Applicable)</p>
         </template>
     </template>
+
     <hr>
 
     <h1 style="color: green;font-weight:bold;">PRODUCT PRICEBOOK SECTION</h1>
-    <!-- <lightning-layout horizontal-align="small" multiple-rows="true">
-        <div style="display: flex;flex-direction:row;justify-content:space-around;">
-            <div>
-            <lightning-layout-item padding="around-small" flexibility="auto">
-                <lightning-input
-                    label="Summary from"
-                    type="date"
-                    name="startDate"
-                    class="input"
-                    value={date3}
-                    onchange={handleChangeDate}>
-                    
-                </lightning-input>
-               
-            </lightning-layout-item>
-        </div>
-
-           <div>
-            <lightning-layout-item padding="around-small" flexibility="auto">
-                <lightning-input
-                    label="Summary To"
-                    type="date"
-                    name="endDate"
-                    class="input"
-                    value={date4}
-                    onchange={handleChangeDate}>
-                </lightning-input>
-               
-            </lightning-layout-item>
-        </div>
-        </div>
-        </lightning-layout> -->
-
-        <!-- <lightning-layout horizontal-align="spread" multiple-rows>
-            <lightning-layout-item flexibility="auto" padding="around-small">
-                <label for="startMonth">Summary From</label>
-                <input
-                    id="startMonth"
-                    type="month"
-                    name="startDate"
-                    class="input"
-                    value={date3}
-                    onchange={handleChangeDate}
-                />
-            </lightning-layout-item>
+    <p style="text-align: center;font-size:16px;font-weight:bold;">CURRENT PRICES FOR: {currentMonthLabel}</p>
     
-            <lightning-layout-item flexibility="auto" padding="around-small">
-                <label for="endMonth">Summary To</label>
-                <input
-                    id="endMonth"
-                    type="month"
-                    name="endDate"
-                    class="input"
-                    value={date4}
-                    onchange={handleChangeDate}
-                />
-            </lightning-layout-item>
-        </lightning-layout> -->
-
-        <p style="text-align: center;font-size:16px;font-weight:bold;">CURRENT PRICES FOR: {currentMonthLabel}</p>
-    
-        <template if:true={datarecords}>
-            <template if:true={datarecords.length}>
-                <div class="header-row" style="font-weight:bold; background:#f4f4f4; padding:10px;">
-                    <div>SR NO.</div>
-                    <div>PRODUCT</div>
-                    <div>PRICE/WP</div>
+    <template if:true={datarecords}>
+        <template if:true={datarecords.length}>
+            <div class="header-row" style="font-weight:bold; background:#f4f4f4; padding:10px;">
+                <div>SR NO.</div>
+                <div>PRODUCT</div>
+                <div>PRICE/WP</div>
+            </div>
+            <template for:each={datarecords} for:item="item">
+                <div class="data-row" key={item.productId} style="padding:10px; border-bottom:1px solid #ddd;">
+                    <div>{item.serialNumber}</div>
+                    <div>{item.Product2.Name}</div>
+                    <div>{item.UnitPrice}</div>
                 </div>
-                <template for:each={datarecords} for:item="item">
-                    <div class="data-row" key={item.productId} style="padding:10px; border-bottom:1px solid #ddd;">
-                        <div>{item.serialNumber}</div>
-                        <div>{item.productName}</div>
-                        <div>{item.price}</div>
-                    </div>
-                </template>
             </template>
-            <template if:false={datarecords.length}>
-                <p style="padding: 10px; color: gray;">No product data available for the selected range.</p>
-            </template>
+        </template>
+        <template if:false={datarecords.length}>
+            <p style="padding: 10px; color: gray;">No product data available for the selected range.</p>
+        </template>
     </template>
-    
-
 </template>

@@ -1,0 +1,79 @@
+<template>
+    <lightning-card title="International Lead Approval" icon-name="standard:lead">
+        <div class="slds-m-around_medium">
+            <template if:true={leads}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={leads}
+                    columns={columns}
+                    hide-checkbox-column
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+            </template>
+            <template if:false={leads}>
+                <p>No leads available for approval.</p>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Reject Modal -->
+    <template if:true={isRejectModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Reject Lead</h2>
+                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeRejectModal}>
+                        <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                    </button>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-combobox
+                        label="Rejection Reason"
+                        placeholder="Select a reason"
+                        options={rejectionReasons}
+                        value={selectedRejectionReason}
+                        onchange={handleRejectReasonChange}>
+                    </lightning-combobox>
+                    <template if:true={showOtherReasonField}>
+                        <lightning-textarea
+                            label="Other Reason"
+                            value={rejectionReason}
+                            onchange={handleRejectReasonInput}>
+                        </lightning-textarea>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeRejectModal}></lightning-button>
+                    <lightning-button variant="destructive" label="Reject" onclick={confirmReject} class="slds-m-left_small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- On Hold Modal -->
+    <template if:true={isOnHoldModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Put Lead On Hold</h2>
+                    <button class="slds-button slds-button_icon slds-modal__close" title="Close" onclick={closeOnHoldModal}>
+                        <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                    </button>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-textarea
+                        label="Reason for On Hold"
+                        value={onHoldReason}
+                        onchange={handleOnHoldReasonInput}>
+                    </lightning-textarea>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeOnHoldModal}></lightning-button>
+                    <lightning-button variant="neutral" label="On Hold" onclick={confirmOnHold} class="slds-m-left_small"></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -21,6 +21,8 @@ public class LeadTenderApprovalReminderBatch implements Database.Batchable<SObje
             String expectedRoleName = region + '_Government_Projects_Regional_Manager';
             System.debug('expectedRoleName--> '+ expectedRoleName);
             String actualRoleName = lead.Owner.UserRole != null ? lead.Owner.UserRole.DeveloperName : null;
+            System.debug('lead.Owner --> '+ lead);
+            System.debug('Lead Owner--> '+ lead.Owner.UserRole);
             System.debug('actualRoleName--> '+actualRoleName);
 
             if (actualRoleName != null && actualRoleName.equalsIgnoreCase(expectedRoleName)) {
@@ -33,7 +35,7 @@ public class LeadTenderApprovalReminderBatch implements Database.Batchable<SObje
         }
 
         if (!ownerToLeadsMap.isEmpty()) {
-            List<User> owners = [SELECT Id, Email, Name FROM User WHERE Id IN :ownerToLeadsMap.keySet()];
+            List<User> owners = [SELECT Id, Email, Name FROM User WHERE IsActive = TRUE AND Id IN :ownerToLeadsMap.keySet()];
             Map<Id, User> userMap = new Map<Id, User>(owners);
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
 

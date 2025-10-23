@@ -1,73 +1,68 @@
-import { LightningElement, track, wire } from 'lwc';
-import inboundInput from '@salesforce/apex/inputInboundApex.inboundInput';
-import updateInboundInput from '@salesforce/apex/inputInboundApex.updateInboundInput';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { LightningElement, wire, track } from 'lwc';
+import { updateRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import inboundInput from '@salesforce/apex/inputInboundApex.inboundInput';
 
+// Column configurations
 const CHINA_COLUMNS = [
     { label: 'Raw Material Name', fieldName: 'Name' },
-    { label: 'China BCD ', fieldName: 'China_BCD__c' },
-    { label: 'China ADD ', fieldName: 'China_ADD__c' },
-    { label: 'China CVD ', fieldName: 'China_CVD__c' },
-    { label: 'China SWS ', fieldName: 'China_SWS__c' },
-    { label: 'China AIDC ', fieldName: 'China_AIDC__c' }
+     { label: 'China BCD %', fieldName: 'China_BCD__c', editable: true },
+    { label: 'China ADD %', fieldName: 'China_ADD__c', editable: true },
+     { label: 'China CVD %', fieldName: 'China_CVD__c', editable: true },
+     { label: 'China SWS %', fieldName: 'China_SWS__c', editable: true },
+    { label: 'China AIDC %', fieldName: 'China_AIDC__c', editable: true }
+   
+   
+    
 ];
 
 const MALAYSIA_COLUMNS = [
     { label: 'Raw Material Name', fieldName: 'Name' },
-    { label: 'Malaysia BCD ', fieldName: 'Malaysia_BCD__c' },
-    { label: 'Malaysia ADD ', fieldName: 'Malaysia_ADD__c' },
-    { label: 'Malaysia CVD ', fieldName: 'Malaysia_CVD__c' },
-    { label: 'Malaysia AIDC ', fieldName: 'Malaysia_AIDC__c' }
+    { label: 'Malaysia BCD %', fieldName: 'Malaysia_BCD__c', editable: true },
+    { label: 'Malaysia ADD %', fieldName: 'Malaysia_ADD__c', editable: true },
+     { label: 'Malaysia CVD %', fieldName: 'Malaysia_CVD__c', editable: true },
+    { label: 'Malaysia AIDC %', fieldName: 'Malaysia_AIDC__c', editable: true }
+    
+   
 ];
 
 const VIETNAM_COLUMNS = [
     { label: 'Raw Material Name', fieldName: 'Name' },
-    { label: 'Vietnam BCD ', fieldName: 'Vietnam_Bcd__c' },
-    { label: 'Vietnam ADD ', fieldName: 'Vietnam_ADD__c' },
-    { label: 'Vietnam CVD ', fieldName: 'Vietnam_CVD__c' },
-    { label: 'Vietnam AIDC ', fieldName: 'Vietnam_AIDC__c' }
+    { label: 'Vietnam BCD %', fieldName: 'Vietnam_Bcd__c', editable: true },
+    { label: 'Vietnam ADD %', fieldName: 'Vietnam_ADD__c', editable: true },
+    { label: 'Vietnam CVD %', fieldName: 'Vietnam_CVD__c', editable: true },
+    { label: 'Vietnam AIDC %', fieldName: 'Vietnam_AIDC__c', editable: true }
 ];
 
-export default class InputInboundLogistics extends LightningElement {
+export default class inputinboundlogistics extends LightningElement {
+    @track searchValue = '';
     @track columns = [];
-    @track preparedRows = [];
-    @track selectedCountry = 'China';
-
-    originalData = [];
+    @track filteredData = [];
+    @track allData = [];
+    draftValues = [];
     wiredDataResult;
-    editedRows = {};
+    selectedCountry;
 
     @wire(inboundInput)
     wiredData(result) {
         this.wiredDataResult = result;
-        const { error, data } = result;
-        if (data) {
-            this.originalData = data;
-            this.setCountry(this.selectedCountry);
-        } else if (error) {
-            console.error('Error loading data:', error);
-            this.showToast('Error', error.body.message, 'error');
+        if (result.data) {
+            this.allData = result.data;
+            this.filterData();
+        } else if (result.error) {
+            this.showToast('Error', result.error.body.message, 'error');
         }
     }
 
-    get chinaButtonVariant() {
-        return this.selectedCountry === 'China' ? 'brand' : 'neutral';
-    }
-    get malaysiaButtonVariant() {
-        return this.selectedCountry === 'Malaysia' ? 'brand' : 'neutral';
-    }
-    get vietnamButtonVariant() {
-        return this.selectedCountry === 'Vietnam' ? 'brand' : 'neutral';
+    handleSearchChange(event) {
+        this.searchValue = event.target.value.toLowerCase();
+        this.filterData();
     }
 
     handleCountrySelect(event) {
-        this.setCountry(event.target.dataset.country);
-    }
-
-    setCountry(country) {
-        this.selectedCountry = country;
-        switch (country) {
+        this.selectedCountry = event.target.dataset.country;
+        switch(this.selectedCountry) {
             case 'China':
                 this.columns = CHINA_COLUMNS;
                 break;
@@ -77,118 +72,46 @@ export default class InputInboundLogistics extends LightningElement {
             case 'Vietnam':
                 this.columns = VIETNAM_COLUMNS;
                 break;
-            default:
-                this.columns = [];
         }
-        this.prepareRows();
+        this.filterData();
     }
 
-    prepareRows() {
-        this.preparedRows = this.originalData.map(row => {
-            const isGlass = row.Name && row.Name.toLowerCase().includes('glass');
-            const cells = this.columns.map(col => {
-                let cellClass = '';
-                let cellTitle = '';
-                let displayValue = row[col.fieldName] ?? '';
-
-                if (isGlass) {
-                    cellClass = 'glass-cell';
-                    if (this.selectedCountry === 'China' && col.fieldName === 'China_ADD__c') {
-                        cellClass += ' china-add-cell';
-                    }
-                }
-
-                const isRawMaterialName = col.fieldName === 'Name';
-                const isChinaAddGlass = col.fieldName === 'China_ADD__c' && row.Name && row.Name.toLowerCase().includes('glass');
-
-
-                // Apply percentage formatting except for Raw Material Name and China ADD
-                if (!row.isEditing && !isRawMaterialName && !isChinaAddGlass) {
-                    if (displayValue !== '' && displayValue !== null && !isNaN(displayValue)) {
-                        displayValue = `${Number(displayValue)}%`;
-                    }
-                }
-
-                return {
-                    fieldName: col.fieldName,
-                    value: displayValue,
-                    class: cellClass,
-                    title: cellTitle,
-                    isRawMaterialName
-                };
-            });
-
-            return {
-                Id: row.Id,
-                cells,
-                rowClass: isGlass ? 'glass-row' : '',
-                isEditing: this.editedRows[row.Id]?.isEditing || false,
-                draftValues: this.editedRows[row.Id]?.draftValues || {...row}
-            };
+    filterData() {
+        this.filteredData = this.allData.filter(item => {
+            const nameMatch = item.Name?.toLowerCase().includes(this.searchValue);
+            const countryMatch = this.selectedCountry ? 
+                this.hasCountryData(item, this.selectedCountry) : 
+                true;
+            return nameMatch && countryMatch;
         });
     }
 
-    handleEditRow(event) {
-        const rowId = event.target.dataset.rowId;
-        const row = this.originalData.find(r => r.Id === rowId);
-        
-        this.editedRows[rowId] = {
-            isEditing: true,
-            draftValues: {...row}
-        };
-        
-        this.prepareRows();
+    hasCountryData(item, country) {
+        const prefix = country === 'Vietnam' ? 'Vietnam_' : country + '_';
+        return Object.keys(item).some(field => 
+            field.startsWith(prefix) && item[field] != null
+        );
     }
 
-    handleCellChange(event) {
-        const rowId = event.target.dataset.rowId;
-        const fieldName = event.target.dataset.field;
-        let value = event.target.value;
-        
-        // Remove percentage symbol if user enters it during edit
-        if (typeof value === 'string' && value.endsWith('%')) {
-            value = value.slice(0, -1);
-        }
-        
-        if (this.editedRows[rowId]) {
-            this.editedRows[rowId].draftValues[fieldName] = value;
-        }
-    }
-
-    handleCancelEdit(event) {
-        const rowId = event.target.dataset.rowId;
-        delete this.editedRows[rowId];
-        this.prepareRows();
-    }
-
-    async handleSaveRow(event) {
-        const rowId = event.target.dataset.rowId;
-        const draftRow = this.editedRows[rowId];
-        
-        if (!draftRow) return;
-        
+    async handleSave(event) {
         try {
-            // Prepare the record to update
-            const recordToUpdate = {
-                Id: rowId,
-                ...this.getCountryFields(this.selectedCountry, draftRow.draftValues)
-            };
-            
-            // Update record
-            await updateInboundInput({ recordsToUpdate: [recordToUpdate] });
-            
-            // Show success toast
-            this.showToast('Success', 'Row updated successfully', 'success');
-            
-            // Refresh data
+            const records = event.detail.draftValues.map(draft => ({
+                fields: {
+                    Id: draft.Id,
+                    ...this.getCountryFields(this.selectedCountry, draft)
+                }
+            }));
+
+            const promises = records.map(record => updateRecord(record));
+            await Promise.all(promises);
+
             await refreshApex(this.wiredDataResult);
+            this.filterData();
             
-            // Reset edit state
-            delete this.editedRows[rowId];
-            this.prepareRows();
-            
+            this.draftValues = [];
+            this.showToast('Success', 'Records updated successfully!', 'success');
         } catch (error) {
-            this.showToast('Error', error.body?.message || error.message, 'error');
+            this.showToast('Error', error.body.message, 'error');
         }
     }
 
@@ -206,12 +129,10 @@ export default class InputInboundLogistics extends LightningElement {
     }
 
     showToast(title, message, variant) {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title,
-                message,
-                variant
-            })
-        );
+        this.dispatchEvent(new ShowToastEvent({
+            title,
+            message,
+            variant
+        }));
     }
 }

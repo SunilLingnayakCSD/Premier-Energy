@@ -1,5 +1,5 @@
 <template>
-    <template if:true={acc}>
+    <template if:true={dataload}>
     <div class="mainContainer">
      <div class="submainContainer">
      <div>
@@ -62,7 +62,7 @@
             </template>
         </table>
     </div>
-    </div>
+</div>
     </div>
     </div>
     </template>
@@ -70,7 +70,7 @@
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
             class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container modelMainContainer">
-                 <button class="slds-button slds-button_icon slds-modal__close" onclick={closeModal}>
+                <button class="slds-button slds-button_icon slds-modal__close" onclick={closeModal}>
                     <lightning-icon icon-name='utility:close' alternative-text='close' variant='error' size='small'
                         title='close'></lightning-icon>
                     <span class="slds-assistive-text">Cancel and close</span>
@@ -83,9 +83,9 @@
                     <div class="containerModal">
 
                         <template if:true={model}>
-                            <template if:true={acc}>
+                            <!-- <template if:true={acc}> -->
                             <!-- <template for:each={accounts} for:item="account">  -->
-                              <div key={acc.Name} title={acc.Name}>
+                              <!-- <div key={acc.Name} title={acc.Name}> -->
                     
                          <div style="display: flex; flex-direction:row;justify-content:space-between;">
                           <h1 style="font-size:20px;margin-left:40%;">CREATE NEW ORDER</h1>
@@ -156,8 +156,9 @@
                             <div style="display: flex; font-weight: bold; background-color: #f0f0f0; padding: 10px;text-align:center;">
                                 <div style="flex: 1;">Product</div>
                                 <div style="flex: 1;">Quantity</div>
+                                <div style="flex: 1;">Pallets</div>
                                 <div style="flex: 1;">Wp</div>
-                                <div style="flex: 1;">Price</div>
+                                <div style="flex: 1;">Price/Wp/Units</div>
                                 <div style="flex: 1;">Total</div>
                                 <div style="flex: 1;">Delete</div>
                             </div>
@@ -171,7 +172,7 @@
                                             data-rowid={row.rowId}
                                             value={row.selectedProductId}
                                             placeholder="Select Product"
-                                            style="text-align:center;width:180px;"
+                                            style="text-align:center;width:160px;"
                                             options={productOptions}
                                             onchange={handleProductChange}
                                            >
@@ -184,31 +185,37 @@
                                             name="quantity"
                                             data-rowid={row.rowId}
                                             value={row.quantity}
-                                            style="width: 70px;margin-right:30px;"
+                                            style="width: 70px;"
                                             min="1"
+                                            data-seletedid={row.selectedProductId}
                                             onchange={handleQuantityChange}
                                             >
                                         </lightning-input>
                                     </div>
-
-                                     <div style="flex: 1; padding-top: 10px;;padding-right: 20px">
+                                     <div style="flex: 1; padding-top: 16px;margin-right:14px;">
+                                        <template if:true={row.selectedProductId}>
+                                               {row.pallets}
+                                        </template>
+                                    </div>
+                                     <div style="flex: 1; padding-top: 16px;margin-right:14px;">
                                         <template if:true={row.selectedProductId}>
                                              {row.Wp}
                                         </template>
                                     </div>
                     
-                                    <div style="flex: 1; padding-top: 10px;;padding-right: 20px">
+                                    <div style="flex: 1; padding-top: 16px;margin-right:14px;">
                                         <template if:true={row.selectedProductId}>
                                             ₹ {row.price}
                                         </template>
                                     </div>
                     
-                                    <div style="flex: 1; padding-top: 10px;padding-right: 20px;">
+                                    <div style="flex: 1; padding-top: 16px;margin-right:8px;">
                                         <template if:true={row.selectedProductId}>
                                             ₹ {row.total}
+                                             <!-- ₹ {formattedtotalprice} -->
                                         </template>
                                     </div>
-                                    <div style="flex: 1; padding-top: 10px;">
+                                    <div style="flex: 1; padding-top: 16px;margin-right:8px;">
                                         <lightning-icon icon-name="utility:delete" size="small" style="cursor: pointer;" data-id={row.rowId} onclick={handleDeleteRow}
                                         ></lightning-icon>
                                     </div>
@@ -226,33 +233,37 @@
                         </div>
                     
                         <div>
+                             <div style="text-align: right;">
+                                <label>Total Pallets</label>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedPallets} readonly>
+                            </div> 
                             <div style="text-align: right;">
                                 <label>Total Quantity</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={QuantityTotal} readonly>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedQuantity} readonly>
                             </div> 
                             <div style="text-align: right;">
                                 <label>TotalWp</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={wpTotal} readonly>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedwptotal} readonly>
                             </div>
                             <div style="text-align: right;">
                                 <label>Total Capacity in MWp</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={MwpTotal} readonly>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedMWptotal} readonly>
                             </div>
                             <div style="text-align: right;">
                                 <label>TOTAL AMOUNT</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={grandTotal} readonly>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedTotalAmount} readonly>
                             </div>
                             <div style="text-align: right;">
                                 <label>TDS @ 0.1% (LESS)</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={tdsAmount} readonly>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedTdsAmount} readonly>
                             </div>
                             <div style="text-align: right;">
-                                <label>GST @ 12% (ADD)</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid;" value={gstAmount} readonly>
+                                <label>GST @ 5% (ADD)</label>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid;" value={formattedGstAmount} readonly>
                             </div>
                             <div style="text-align: right;">
-                                <label>GRAND TOTAL</label>
-                                <input type="text" style="width:200px;text-align:center;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={finalPayable} readonly>
+                                <label><b>GRAND TOTAL</b></label>
+                                <input type="text" style="width:200px;text-align:right;padding:5px;border-radius:4px;margin:9px;border:1px solid" value={formattedGrandTotalAmount} readonly>
                             </div>
                         </div>
                         <div>
@@ -270,6 +281,7 @@
                             <p>{item.Term2__c}</p>
                             <p>{item.Term3__c}</p>
                             <p>{item.Term4__c}</p>
+                            <p>{item.Term5__c}</p>
                         </div>
                     </template>
                     </template>
@@ -278,7 +290,7 @@
                               type="text"
                               label="GST IN"
                               class="input"
-                              value={acc.account.Customer_GST_Number__c}
+                              value={gstNumber}
                             ></lightning-input>
                             </div>
                         </div>
@@ -298,14 +310,14 @@
                                            />
                                 </div>
                             
-        
-                                <lightning-input class="input1" type="text" label="ACCOUNT DETAILS" value={acc.account.Name}></lightning-input>
+
+                                <lightning-input class="input1" type="text" label="ACCOUNT DETAILS" value={accountName}></lightning-input>
                             </div>
                         </div>
-                        </div>
+                        <!-- </div> -->
                     
                         <!-- </template> -->
-                       </template>
+                       <!-- </template> -->
                        <div style="text-align:center;">
                         <button style="width: 200px;padding:10px;background-color:blue;font-weight:bold;color:white;font-size:16px;border:none;" onclick={handleSubmit}>
                             SUBMIT

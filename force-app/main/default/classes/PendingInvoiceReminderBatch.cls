@@ -2,9 +2,10 @@ public class PendingInvoiceReminderBatch implements Database.Batchable<SObject>,
 
     public Database.QueryLocator start(Database.BatchableContext bc) {
         return Database.getQueryLocator([
-            SELECT Id, Name, Status__c, Amount__c, Invoice_Date__c, Account__r.Name, Account__r.Email__c
+            SELECT Id, Name, Status__c, Amount__c, Invoice_Date__c,Account__c, Account__r.Name, Account__r.Email__c,Invoice_Number__c,
+            Order__c,Order__r.PoNumber,FTR_Request_Date__c,FTR_Re_Request_Date__c
             FROM Invoice__c
-            WHERE Status__c = 'Pending'
+            WHERE (Status__c = 'Request' OR Status__c = 'Re-Request')
             AND Account__r.Email__c != null
         ]);
     }
@@ -28,10 +29,11 @@ public class PendingInvoiceReminderBatch implements Database.Batchable<SObject>,
                    Manager.Email, Manager.Name,
                    Manager.Manager.Email, Manager.Manager.Name
             FROM User
-            WHERE Email IN :emailSet
+            WHERE IsActive = TRUE AND Email IN :emailSet AND UserRole.DeveloperName = 'ssrinPartnerPersonAccount'
         ]) {
             System.debug('u--> '+ u);
             emailToUserMap.put(u.Email.trim().toLowerCase(), u);
+            System.debug('emailToUserMap--> '+ emailToUserMap);
         }
 
         // Group invoices by ZSM (manager’s manager)
@@ -58,17 +60,20 @@ public class PendingInvoiceReminderBatch implements Database.Batchable<SObject>,
             zsmToInvoices.get(zsmEmail).add(inv);
 
             // CC the RSM (user) and ASM (manager)
-            if (!String.isBlank(u.Email)) zsmToCCEmails.get(zsmEmail).add(u.Email);
+            if (!String.isBlank(u.Manager.Manager.Email)) zsmToCCEmails.get(zsmEmail).add(u.Manager.Manager.Email);
             if (!String.isBlank(u.Manager.Email)) zsmToCCEmails.get(zsmEmail).add(u.Manager.Email);
         }
+        
+        System.debug('zsmToInvoices--> '+zsmToInvoices);
 
         // Sales Operations users (To)
         List<User> salesOpsUsers = [
-            SELECT Email FROM User WHERE UserRole.DeveloperName = 'Sales_Operation'
+            SELECT Email FROM User WHERE IsActive = TRUE AND Profile.Name = 'Channel Sales -Sales Operation 1' AND UserRole.DeveloperName = 'Sales_Operation'
         ];
         List<String> toEmails = new List<String>();
         for (User u : salesOpsUsers) {
             toEmails.add(u.Email);
+            System.debug('toEmails--> '+toEmails);
         }
 
         // Prepare and send emails
@@ -83,29 +88,33 @@ public class PendingInvoiceReminderBatch implements Database.Batchable<SObject>,
             for (Invoice__c inv : invList) {
                 tableRows += '<tr>' +
                              '<td>' + srNo + '</td>' +
-                             '<td>' + inv.Name + '</td>' +
+                             '<td>' + (inv.Status__c == 'Request' ? inv.FTR_Request_Date__c : inv.FTR_Re_Request_Date__c)+ '</td>' +
                              '<td>' + inv.Account__r.Name + '</td>' +
-                             '<td>' + inv.Amount__c + '</td>' +
-                             '<td>' + (inv.Invoice_Date__c != null ? inv.Invoice_Date__c.format() : '') + '</td>' +
+                             '<td>' + inv.Invoice_Number__c + '</td>' +
+                             '<td>' + inv.Order__r.PoNumber + '</td>' +
+                             '<td>' + inv.Order__c + '</td>' +
                              '</tr>';
                 srNo++;
             }
 
             String body = '<html><body>' +
                           '<p>Dear Team,</p>' +
-                          '<p>Please find below the pending invoices for your action:</p>' +
+                          '<p>The following FTR reports are pending. Kindly upload the documents in the system.:</p>' +
                           '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%;">' +
                           '<tr>' +
-                          '<th>S No.</th><th>Invoice Number</th><th>Customer Name</th><th>Amount</th><th>Invoice Date</th>' +
+                          '<th>S No.</th><th>Request Date</th><th>Distributor Name</th><th>Invoice Number</th><th>PO Name</th><th>SAP SO Number</th>' +
                           '</tr>' + tableRows +
                           '</table>' +
+                          '<p>Kindly go through the below link to take further actions.</p>' +
+                          '<p><a href="' + getInvoiceLink() + '">Link to Salesforce Page</a></p>' +
                           '<p>Thank you.</p>' +
                           '</body></html>';
 
             Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
             mail.setToAddresses(toEmails);
             mail.setCcAddresses(new List<String>(ccSet));
-            mail.setSubject('Reminder: Pending Invoices for SAP SO Creation');
+            System.debug('ccSet--> '+ ccSet);
+            mail.setSubject('Reminder: Pending FTR Request reminder');
             mail.setHtmlBody(body);
             mail.setSenderDisplayName('Premier Energies');
 
@@ -119,6 +128,10 @@ public class PendingInvoiceReminderBatch implements Database.Batchable<SObject>,
 
     public void finish(Database.BatchableContext bc) {
         System.debug('Pending Invoice Reminder Batch complete.');
+    }
+    
+    private String getInvoiceLink() {
+        return System.Url.getOrgDomainUrl().toExternalForm() + '/lightning/o/Invoice__c/list?filterName=__Recent';
     }
 
     public void execute(SchedulableContext sc) {

@@ -2,11 +2,28 @@ import { LightningElement, wire, api, track } from 'lwc';
 import getRawMaterialData from '@salesforce/apex/RawMaterialLogger.RawMaterial';
 import userId from '@salesforce/user/Id';
 import getUserProfileName from '@salesforce/apex/RawMaterialLogger.getUserProfileName';
+import getCountryPricing from '@salesforce/apex/RawMaterialLogger.getCountryPricing';
+import updateCountry from '@salesforce/apex/RawMaterialLogger.updateCountry';
+import updatePricingType from '@salesforce/apex/RawMaterialLogger.updatePricingType';
 import getAdminInputs from '@salesforce/apex/RawMaterialLogger.getAdminInputs';
 import createVariables from '@salesforce/apex/RawMaterialLogger.createVariables';
 import checkVariables from '@salesforce/apex/RawMaterialLogger.checkVariables';
 import updatefinals from '@salesforce/apex/RawMaterialLogger.updateFinalWP';
+import updateFinalWPbyNH from '@salesforce/apex/RawMaterialLogger.updateFinalWPbyNH';
+import alreadyUpdatedByKAM from '@salesforce/apex/RawMaterialLogger.alreadyUpdatedByKAM';
+import grayoutforNH from '@salesforce/apex/RawMaterialLogger.grayoutforNH';
+import lockingprice from '@salesforce/apex/RawMaterialLogger.lockingprice';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+//import createAttachment from '@salesforce/apex/PricingAttachment.createAttachment';
+import savePricingData from '@salesforce/apex/PricingAttachment.savePricingData';
+import generatePricingAttachment from '@salesforce/apex/PricingAttachment.generatePricingAttachment';
+import inboundInput from '@salesforce/apex/inputInboundApex.inboundInput';
+import getFreightMetadata from '@salesforce/apex/FreightChargesController.getFreightMetadata';
+import metadataUpdate from '@salesforce/apex/update_MetaData.metadataUpdate';
+import getSegmentMetadata from '@salesforce/apex/AopEbitda.metadataUpdate';
+import getPreEbitdaSegmentMetadata from '@salesforce/apex/segmentApexClass.metadataUpdate';
+import RawMaterialsNamesQueryANdUom from '@salesforce/apex/UimakeApexClass.RawMaterialsNamesQueryANdUom';
+import get20FtAnd40Ft from '@salesforce/apex/pricingconfigurationApexClass.get20FtAnd40Ft';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class RawMaterialLogger extends NavigationMixin(LightningElement) {
@@ -28,6 +45,30 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
     @track overallTotalCentWp = 0;
     @track storeVariableIds = [];
     @track seeFinalOnly = false;
+    @track filteredData = [];
+    @track allData = [];
+    @track searchValue = '';
+    @track seaFreightData = [];
+    @track inlandTransportData = [];
+    @track freight = 0;
+    wiredMetadataResult;
+    financialParams = {};
+    wiredMetadataResultadmin;
+    retryCount = 0;
+    segments = [];
+    segmentspre = [];
+    @track allDataUomMakes = [];
+    @track filteredIndiaData = [];
+    @track filteredDataCMV = [];
+    @track filteredDataCMVUpdate = [];
+    @track filteredDataIndiapdate = [];
+    @track rawdata = [];
+    @track outboundlogisticattachment = [];
+    @track isDisabled = false;
+    @track isUpdateByNationalHead = false;
+    @track isAlreadyUpdatedbyKam = false;
+    @track isgrayoutforNH = false;
+    @track isLockPrice = false;
 
     countryOptions = [
         { label: 'China', value: 'China' },
@@ -39,17 +80,324 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
         { label: 'Average Price', value: 'Average Price' },
         { label: 'Low Price', value: 'Low Price' }
     ];
+    @wire(inboundInput)
+    wiredData(result) {
+        this.wiredDataResult = result;
+        if (result.data) {
+            this.allData = result.data;
+            this.filterData();
+        } else if (result.error) {
+            console.log('inbound error : ', result.error);
+        }
+    }
+    filterData() {
+        this.filteredData = this.allData.filter(item => {
+            const nameMatch = item.Name?.toLowerCase().includes(this.searchValue);
+            const countryMatch = this.countrySource ?
+                this.hasCountryData(item, this.countrySource) :
+                true;
+            return nameMatch && countryMatch;
+        });
+    }
+    hasCountryData(item, country) {
+        const prefix = country === 'Vietnam' ? 'Vietnam_' : country + '_';
+        return Object.keys(item).some(field =>
+            field.startsWith(prefix) && item[field] != null
+        );
+    }
+    @wire(getFreightMetadata)
+    wiredFreight(result) {
+        this.wiredMetadataResult = result;
+        const { data, error } = result;
+
+        if (data) {
+            this.processData(data);
+            this.retryCount = 0;
+        } else if (error) {
+            console.log('error freight : ', error);
+        }
+    }
+    processData(data) {
+        let keyCounter = 1;
+
+        // Sea Freight
+        this.seaFreightData = [
+            this.createFreightRow(keyCounter++, '20 Ft', ['China', 'Vietnam', 'Malaysia']),
+            this.createFreightRow(keyCounter++, '40 Ft', ['China', 'Vietnam', 'Malaysia'])
+        ];
+
+        // Inland Transport
+        this.inlandTransportData = [
+            this.createFreightRow(keyCounter++, '20 Ft', ['China', 'Vietnam', 'Malaysia']),
+            this.createFreightRow(keyCounter++, '40 Ft', ['China', 'Vietnam', 'Malaysia'])
+        ];
+
+        // Map metadata to UI
+        data.forEach(record => {
+            const country = record.MasterLabel;
+
+            // Sea Freight
+            this.seaFreightData.forEach(row => {
+                const field = row.containerSize === '20 Ft'
+                    ? 'Sea_Frieght_USD_20Ft__c'
+                    : 'Sea_Frieght_USD_40Ft__c';
+
+                if (['China', 'Vietnam', 'Malaysia'].includes(country)) {
+                    this.updateRowData(row, record, country, field);
+                }
+            });
+
+            // Inland Transport
+            if (['China', 'Vietnam', 'Malaysia'].includes(country)) {
+                this.inlandTransportData.forEach(row => {
+                    const field = row.containerSize === '20 Ft'
+                        ? 'Inland_Transport_INR_20Ft__c'
+                        : 'Inland_Transport_INR_40Ft__c';
+                    this.updateRowData(row, record, country, field);
+                });
+            }
+        });
+    }
+    createFreightRow(key, containerSize, countries) {
+        const tempValues = {};
+        const formattedValues = {};
+        const DeveloperNames = {};
+        countries.forEach(c => {
+            tempValues[c] = null;
+            formattedValues[c] = '';
+        });
+
+        return { key, containerSize, isEdit: false, tempValues, formattedValues, DeveloperNames };
+    }
+
+    updateRowData(row, record, country, field) {
+        if (record[field] !== undefined && row.tempValues.hasOwnProperty(country)) {
+            row.tempValues[country] = record[field];
+            row.formattedValues[country] = this.formatNumber(record[field]);
+            row.DeveloperNames[country] = record.DeveloperName;
+        }
+    }
+    formatNumber(value) {
+        return value !== null && value !== undefined ? value.toFixed(2) : '';
+    }
+    @wire(metadataUpdate)
+    wiredMetadata(result) {
+        this.wiredMetadataResultadmin = result;
+        const { data, error } = result;
+        if (data) {
+            this.financialParams = { ...data[0] };
+        } else if (error) {
+            console.log('admin attachment error : ', error);
+        }
+    }
+
+    @wire(getSegmentMetadata)
+    wiredAOP({ data, error }) {
+        if (data) {
+            this.segments = data.map(record => ({
+                masterLabel: record.MasterLabel,
+                dcr: record.DCR__c,
+                ndcr: record.NDCR__c
+            }));
+
+        } else if (error) {
+            console.log('aop error : ', error);
+        }
+    }
+
+    @wire(getPreEbitdaSegmentMetadata)
+    wiredpreebitda({ data, error }) {
+        if (data) {
+            this.segmentspre = data.map(record => ({
+                masterLabel: record.MasterLabel,
+                dcr: record.DCR__c,
+                ndcr: record.NDCR__c
+            }));
+        } else if (error) {
+            console.log('pre ebitda error : ', error);
+        }
+    }
+    @wire(RawMaterialsNamesQueryANdUom, { searchKey: '$searchValue' })
+    wiredRawMaterialsUom(result) {
+        const { data, error } = result;
+        if (data) {
+            this.allDataUomMakes = data;
+            this.filteredIndiaData = this.allDataUomMakes.filter(
+                record => record.India_Average_Price__c > 0
+            );
+            this.filteredDataIndiapdate = this.filteredIndiaData.map(item => ({
+                "Raw Material Name": item.Name,
+                "UOM": item.UOM__c,
+                "India Make1": item.India_Make1__c || 0,
+                "India Make2": item.India_Make2__c || 0,
+                "India Make3": item.India_Make3__c || 0,
+                "India Make4": item.India_Make4__c || 0,
+                "India Low Price": item.India_Low_Price__c || 0,
+                "India Average Price": item.India_Average_Price__c || 0
+            }));
+
+            if (this.countrySource == 'China') {
+                this.filteredDataCMV = this.allDataUomMakes.filter(
+                    record => record.China_Average_Price__c >= 0 ? record.India_Average_Price__c == 0 : record
+                );
+                this.filteredDataCMVUpdate = this.filteredDataCMV.map(item => ({
+                    "Raw Material Name": item.Name,
+                    "UOM": item.UOM__c,
+                    "China Make1": item.China_Make1__c || 0,
+                    "China Make2": item.China_Make2__c || 0,
+                    "China Make3": item.China_Make3__c || 0,
+                    "China Make4": item.China_Make4__c || 0,
+                    "China Low Price": item.China_Low_Price__c || 0,
+                    "China Average Price": item.China_Average_Price__c || 0
+                }));
+
+            } else if (this.countrySource == 'Malaysia') {
+                this.filteredDataCMV = this.allDataUomMakes.filter(
+                    record => record.Malaysia_Average_Price__c >= 0 ? record.India_Average_Price__c == 0 : record
+                );
+                this.filteredDataCMVUpdate = this.filteredDataCMV.map(item => ({
+                    "Raw Material Name": item.Name,
+                    "UOM": item.UOM__c,
+                    "Malaysia Make1": item.Malaysia_Make1__c || 0,
+                    "Malaysia Make2": item.Malaysia_Make2__c || 0,
+                    "Malaysia Make3": item.Malaysia_Make3__c || 0,
+                    "Malaysia Make4": item.Malaysia_Make4__c || 0,
+                    "Malaysia Low Price": item.Malaysia_Low_Price__c || 0,
+                    "Malaysia Average Price": item.Malaysia_Average_Price__c || 0
+                }));
+            } else if (this.countrySource == 'Vietnam') {
+                this.filteredDataCMV = this.allDataUomMakes.filter(
+                    record => record.Vietnam_Average_Price__c >= 0 ? record.India_Average_Price__c == 0 : record
+                );
+                this.filteredDataCMVUpdate = this.filteredDataCMV.map(item => ({
+                    "Raw Material Name": item.Name,
+                    "UOM": item.UOM__c,
+                    "Vietnam Make1": item.Vietnam_Make1__c || 0,
+                    "Vietnam Make2": item.Vietnam_Make2__c || 0,
+                    "Vietnam Make3": item.Vietnam_Make3__c || 0,
+                    "Vietnam Make4": item.Vietnam_Make4__c || 0,
+                    "Vietnam Low Price": item.Vietnam_Low_Price__c || 0,
+                    "Vietnam Average Price": item.Vietnam_Average_Price__c || 0
+                }));
+            } else {
+                this.filteredDataCMVUpdate = [];
+            }
+
+        } else if (error) {
+            console.error('Error fetching data: ', error.body.message);
+        }
+    }
+
+    @wire(get20FtAnd40Ft)
+    wiredMaterials2040(result) {
+        if (result.data) {
+            this.rawdata = result.data.map(item => ({
+                "UOM": item.UOM__c,
+                "Raw Material": item.Name,
+                "Qty (20 Ft)": item.Qty_20_Ft__c || 0,
+                "Qty (40 Ft)": item.Qty_40_Ft__c || 0
+            }));
+        }
+    }
+    handleCreateAttachment() {
+        this.isDisabled = true;
+        console.log('rawJson--> : ', JSON.stringify(this.oliData[this.activeIndex]));
+        console.log('costRows--> : ', JSON.stringify(this.costRows));
+        console.log('filtereddata inbound : ', JSON.stringify(this.filteredData));
+        console.log('seaFreightData--> : ', JSON.stringify(this.seaFreightData));
+        console.log('inlandTransportData--> : ', JSON.stringify(this.inlandTransportData));
+        console.log('financialParams--> : ', JSON.stringify(this.financialParams));
+        console.log('aop ebitda--> : ', JSON.stringify(this.segments));
+        console.log('pre ebitda--> : ', JSON.stringify(this.segmentspre));
+        console.log('India Uom and make--> : ', JSON.stringify(this.filteredDataIndiapdate));
+        console.log('Country based Uom and make--> : ', JSON.stringify(this.filteredDataCMVUpdate));
+        console.log('2040 packaging --. : ', JSON.stringify(this.rawdata));
+        console.log('outbound logistic attachment --> : ', JSON.stringify(this.outboundlogisticattachment));
+        /* createAttachment({ recordId: this.recordId, rawJson: JSON.stringify(this.oliData[this.activeIndex]), costRows: JSON.stringify(this.costRows), inboundlog: JSON.stringify(this.filteredData), finalPrice: this.summaryTotals.finalPrice, finalPriceinCent: this.summaryTotals.finalPriceinCent, fileName: 'PricingSummary', countrySource: this.countrySource,seaFreightData:JSON.stringify(this.seaFreightData),inlandTransportData:JSON.stringify(this.inlandTransportData) })
+             .then((result) => {
+                 console.log('result attachment : ', result);
+             })
+             .catch(error => {
+                 console.log('error attachment : ', error);
+             });*/
+        
+                generatePricingAttachment({ recordId: this.recordId, finalPrice: this.summaryTotals.finalPrice, finalPriceinCent: this.summaryTotals.finalPriceinCent, fileName: 'PricingSummary', countrySource: this.countrySource })
+                    .then((result) => {
+                        console.log('result attachment : ', result);
+                        this.showSuccessToast('Attachment downloaded successfully!');
+                        this.closeModal();
+                    })
+                    .catch(error => {
+                        console.log('error attachment : ', error);
+                        this.showErrorToast('Download Failed');
+                    });
+           
+    }
+
+    @wire(getCountryPricing, { oppId: '$recordId' })
+    wiredPricing({ error, data }) {
+        if (data) {
+            console.log('data cp==> : ', data);
+            this.countrySource = data.countrySource;
+            this.pricingType = data.pricingType;
+        } else if (error) {
+            console.error(error);
+        }
+    }
 
     connectedCallback() {
         getUserProfileName({ userId: this.currentUserId })
             .then(profileName => {
                 console.log('profileName : ', profileName);
-                if (profileName == 'Key Accounts National Head') {
+                if (profileName == 'Key Accounts National Head' || profileName == 'System Administrator') {
                     this.isEditable = true;
+                    this.isUpdateByNationalHead = true;
+                    grayoutforNH({ oppId: this.recordId }).then(result => {
+                        console.log('grayoutforNH result : ', result);
+                        if (result == true) {
+                            this.isgrayoutforNH = true;
+                        } else {
+                            this.isgrayoutforNH = false;
+                        }
+
+                    }).catch(error => {
+                        console.log('grayoutforNH err : ', error);
+                    })
+                    lockingprice({ oppId: this.recordId }).then(result => {
+                        console.log('lockingprice result : ', result);
+                        if (result == true) {
+                            this.isLockPrice = true;
+                        } else {
+                            this.isLockPrice = false;
+                        }
+                    }).catch(error => {
+                        console.log('lockingprice err : ', error);
+                    })
                 }
                 if (profileName == 'Key Accounts Region Head') {
                     this.seeFinalOnly = true;
                     console.log('seeFinalOnly : ', this.seeFinalOnly);
+                    console.log('al recordID--> : ', this.recordId);
+                    alreadyUpdatedByKAM({ oppId: this.recordId }).then(result => {
+                        console.log('alreadyUpdatedByKAM result : ', result);
+                        if (result == true) {
+                            this.isAlreadyUpdatedbyKam = true;
+                        } else {
+                            this.isAlreadyUpdatedbyKam = false;
+                        }
+                    }).catch(error => {
+                        console.log('alreadyUpdatedByKAM error  : ', error);
+                    })
+                    lockingprice({ oppId: this.recordId }).then(result => {
+                        console.log('lockingprice result : ', result);
+                        if (result == true) {
+                            this.isLockPrice = true;
+                        } else {
+                            this.isLockPrice = false;
+                        }
+                    }).catch(error => {
+                        console.log('lockingprice err : ', error);
+                    })
                 }
             })
             .catch(error => {
@@ -60,7 +408,17 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
         return !this.isEditable;
     }
 
+    get isgrayoutforNHfun() {
+        return !this.isgrayoutforNH;
+    }
+
+    get isAlreadyUpdatedbyKam() {
+        return this.isAlreadyUpdatedbyKam;
+    }
+
     get currentProduct() {
+        console.log('currentProduct oli data --> : ',JSON.stringify(this.oliData));
+        console.log('currentProduct---> : ', this.oliData[this.activeIndex]);
         return this.oliData[this.activeIndex] || {};
     }
 
@@ -91,6 +449,7 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
     })
     wiredRawMaterials({ data, error }) {
         if (data) {
+            console.log('data raw--> : ', JSON.stringify(data));
             this.handleRawMaterialsAsync(data);
         } else {
             console.error('Wire error:', error);
@@ -98,25 +457,43 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
     }
     async handleRawMaterialsAsync(data) {
         try {
-            const cleanData = JSON.parse(JSON.stringify(data)); // Breaks Proxy
-            console.log('cleanData--> : ', cleanData);
+            const key = Object.keys(data)[0]; 
 
-            const processedOlis = await Promise.all(
-                Object.entries(cleanData).map(async ([oliId, materials], index) => {
-                    const processed = await this.processMaterials(materials, index, oliId);
-                    const totals = this.calculateTotals(processed);
+            const recordsArray = data[key];
 
-                    return {
-                        oliId,
-                        productName: materials[0]?.productName || 'Product',
-                        materials: processed,
-                        ...totals
-                    };
-                })
-            );
+            const record = recordsArray && recordsArray.length > 0 ? recordsArray[0] : null;
 
-            this.oliData = processedOlis;
+            if (!record) {
+                console.error('No records found inside data[' + key + ']');
+                return;
+            }
+
+            console.log('record.isFromNH : ', record.isFromNH);
+            console.log('record.jsonRows : ', record.jsonRows);
+
+            if (record.isFromNH && record.jsonRows) {
+                this.oliData = Array.isArray(record.jsonRows) ? record.jsonRows : [record.jsonRows];
+            } else {
+                const cleanData = JSON.parse(JSON.stringify(data)); // Breaks Proxy
+                console.log('cleanData--> : ', cleanData);
+
+                const processedOlis = await Promise.all(
+                    Object.entries(cleanData).map(async ([oliId, materials], index) => {
+                        const processed = await this.processMaterials(materials, index, oliId);
+                        const totals = this.calculateTotals(processed);
+
+                        return {
+                            oliId,
+                            productName: materials[0]?.productName || 'Product',
+                            materials: processed,
+                            ...totals
+                        };
+                    })
+                );
+
+                this.oliData = processedOlis;           
             this.activeIndex = 0;
+            }
             this.loadCostData();
         } catch (error) {
             console.error('Async processing failed-->:', error);
@@ -339,157 +716,196 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
 
     processCostRows() {
         const data = this.costDataMap.get(this.currentProduct.oliId) || {};
-        console.log('this.currentProduct.oliId -->: ', this.currentProduct.oliId);
-        console.log('this.currentProduct.totalInrWp -->: ', this.currentProduct.totalInrWp);
-        const totalvalue = parseFloat(this.currentProduct.totalInrWp) || 0;
-        console.log('Admin data--> : ', data);
-        console.log('cbitc--> : ', data.cbitc);
-        console.log('totalInrWp--> : ', totalvalue);
-        console.log('data.warrantyInsurance--> : ', data.warrantyInsurance);
-        console.log('data.rfidCostINR--> : ', data.rfidCostINR);
-        console.log('data.moduleOverheadINR--> : ', data.moduleOverheadINR);
-        console.log('addvalues--> : ', parseFloat(totalvalue + data.rfidCostINR + data.moduleOverheadINR));
-        let moduleWarrantyInsuranceCostINR = 0.00;
-        let moduleWarrantyInsuranceCostCent = 0.00;
-        if (data.thirdpartywarranty == 'Applicable') {
-            moduleWarrantyInsuranceCostINR = (totalvalue + data.rfidCostINR + data.moduleOverheadINR) * (data.warrantyInsurance / 100);
-            console.log('moduleWarrantyInsuranceCostINR--> : ', moduleWarrantyInsuranceCostINR);
-            moduleWarrantyInsuranceCostCent = ((moduleWarrantyInsuranceCostINR * 100) / data.rbi);
-            moduleWarrantyInsuranceCostINR = Number(moduleWarrantyInsuranceCostINR.toFixed(2));
-            moduleWarrantyInsuranceCostCent = moduleWarrantyInsuranceCostCent.toFixed(2);
+        if (data.isFromNH && data.jsonRows) {
+            console.log('data.isFromNH : ', data.isFromNH);
+            console.log('data.jsonRows : ', data.jsonRows);
+            this.costRows = data.jsonRows;
+            const finalPriceRow = data.jsonRows.find(row => row.label === 'FINAL Wp PRICE');
+            const pbtRow = data.jsonRows.find(row => row.label === 'PBT Margin');
+            const moduleFinanceRow = data.jsonRows.find(row => row.label === 'Module Finance Cost(Cents/Wp)');
+
+            const finalpriceINR = parseFloat(finalPriceRow?.col2 || 0);
+            const finalpriceCent = parseFloat(finalPriceRow?.col3 || 0);
+            const pbtINR = parseFloat(pbtRow?.col2 || 0);
+            const totalforebitda = finalpriceINR - pbtINR;
+            const moduleFinanceINR = parseFloat(moduleFinanceRow?.col2 || 0);
+
+            const currentOliId = this.currentProduct.oliId;
+            const existingCostData = this.costDataMap.get(currentOliId) || {};
+            const clonedCostData = { ...existingCostData, finalpriceINR: parseFloat(finalpriceINR), finalpriceCent: parseFloat(finalpriceCent), totalforebitda: parseFloat(totalforebitda), moduleFinanceINR: parseFloat(moduleFinanceINR) };
+            this.costDataMap.set(currentOliId, clonedCostData);
+            console.log('costDataMap---> : ', JSON.stringify(Array.from(this.costDataMap.entries())));
+
+            this.updateSummary();
         } else {
-            moduleWarrantyInsuranceCostINR = 0.00;
-            moduleWarrantyInsuranceCostCent = 0.00;
+            console.log('this.currentProduct.oliId -->: ', this.currentProduct.oliId);
+            console.log('this.currentProduct.totalInrWp -->: ', this.currentProduct.totalInrWp);
+            const totalvalue = parseFloat(this.currentProduct.totalInrWp) || 0;
+            console.log('Admin data--> : ', data);
+            console.log('outbound logistic for attachment--> : ', data.outboundLogforattachment);
+            this.outboundlogisticattachment = data.outboundLogforattachment;
+            console.log('cbitc--> : ', data.cbitc);
+            console.log('noTrucksReq--> : ', data.noTrucksReq);
+            console.log('totalInrWp--> : ', totalvalue);
+            console.log('data.warrantyInsurance--> : ', data.warrantyInsurance);
+            console.log('data.rfidCostINR--> : ', data.rfidCostINR);
+            console.log('data.moduleOverheadINR--> : ', data.moduleOverheadINR);
+            console.log('addvalues--> : ', parseFloat(totalvalue + data.rfidCostINR + data.moduleOverheadINR));
+            console.log('freight : ', data.freight);
+            this.freight = data.freight;
+            let moduleWarrantyInsuranceCostINR = 0.00;
+            let moduleWarrantyInsuranceCostCent = 0.00;
+            if (data.thirdpartywarranty == 'Applicable') {
+                moduleWarrantyInsuranceCostINR = (totalvalue + data.rfidCostINR + data.moduleOverheadINR) * (data.warrantyInsurance / 100);
+                console.log('moduleWarrantyInsuranceCostINR--> : ', moduleWarrantyInsuranceCostINR);
+                moduleWarrantyInsuranceCostCent = ((moduleWarrantyInsuranceCostINR * 100) / data.rbi);
+                moduleWarrantyInsuranceCostINR = Number(moduleWarrantyInsuranceCostINR.toFixed(2));
+                moduleWarrantyInsuranceCostCent = moduleWarrantyInsuranceCostCent.toFixed(2);
+            } else {
+                moduleWarrantyInsuranceCostINR = 0.00;
+                moduleWarrantyInsuranceCostCent = 0.00;
+            }
+            var bGradeModuleLossINR = ((totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.moduleFinanceINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR) * (data.bgrademodulediscount / 100) * (data.bgrademoduleyield / 100));
+            console.log('total for bgrade : ', (totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.moduleFinanceINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR));
+            console.log('bGradeModuleLossINR cal--> : ', bGradeModuleLossINR);
+            var bGradeModuleLossCent = ((bGradeModuleLossINR * 100) / data.rbi);
+            bGradeModuleLossINR = Number(bGradeModuleLossINR);
+            // bGradeModuleLossINR = Number(this.formatDecimal(bGradeModuleLossINR));
+            console.log('bGradeModuleLossINR format--> : ', bGradeModuleLossINR);
+            bGradeModuleLossCent = Number(bGradeModuleLossCent);
+            const abgCostINR = Number((
+                (parseFloat(data.abgvalue) || 0) *
+                (parseFloat(data.abgpbgcost / 100) || 0) /
+                365 *
+                (parseFloat(data.abgvalidity) || 0) /
+                (parseFloat(data.projectcapacity) || 1) /
+                1000000
+            ).toFixed(2));
+            console.log('abgCostINR--> : ', abgCostINR);
+            const abgCostCent = this.formatDecimal((abgCostINR * 100) / data.rbi);
+            console.log('abgCostCent--> : ', (abgCostINR * 100) / data.rbi);
+            console.log('data.pbgvalue--> : ', data.pbgvalue);
+            console.log('data.abgpbgcost--> : ', data.abgpbgcost);
+            console.log('data.pbgvalidity--> : ', data.pbgvalidity);
+            console.log('data.projectcapacity--> : ', data.projectcapacity);
+            const pbgCostINR = Number((
+                (parseFloat(data.pbgvalue) || 0) *
+                (parseFloat(data.abgpbgcost / 100) || 0) /
+                365 *
+                (parseFloat(data.pbgvalidity) || 0) /
+                (parseFloat(data.projectcapacity) || 1) /
+                1000000
+            ).toFixed(2));
+            console.log('pbgCostINR--> : ', pbgCostINR);
+            const pbgCostCent = ((pbgCostINR * 100) / data.rbi).toFixed(2);
+            console.log('data.insurancepremiumcost--> : ', data.insurancepremiumcost);
+            var transitinsurancecostINR = parseFloat(totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.moduleFinanceINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR + bGradeModuleLossINR + abgCostINR + pbgCostINR + data.outboundlogisticsINR + data.exportfreightchargesINR) * (data.insurancepremiumcost / 100);
+            var transitinsurancecostCent = (transitinsurancecostINR * 100 / data.rbi);
+            transitinsurancecostINR = Number(transitinsurancecostINR);
+            console.log('transitinsurancecostINR--> : ', transitinsurancecostINR);
+            transitinsurancecostCent = transitinsurancecostCent;
+            console.log('data.paymentterm--> : ', data.paymentterm);
+            console.log('data.lcinterestcost--> : ', data.lcinterestcost);
+            console.log('data.lcusanceperiod--> : ', data.lcusanceperiod);
+            const sumforlcinterest = parseFloat(totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.moduleFinanceINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR + bGradeModuleLossINR + abgCostINR + pbgCostINR + data.outboundlogisticsINR + data.exportfreightchargesINR);
+            console.log('sumforlcinterest--> : ', sumforlcinterest);
+            let lcinterestcostINR = 0.00;
+            let lcinterestcostCent = 0.00;
+            console.log('data.paymenttrembalance--> : ', data.paymenttrembalance);
+            if (data.paymenttrembalance == 'LC') {
+                lcinterestcostINR = (
+                    (parseFloat(sumforlcinterest)) *
+                    (parseFloat(1 - (data.paymentterm / 100))) *
+                    parseFloat(data.lcinterestcost / 100) / 365 *
+                    parseFloat(data.lcusanceperiod)
+                );
+                lcinterestcostINR = Number(lcinterestcostINR);
+                lcinterestcostCent = (lcinterestcostINR * 100 / data.rbi);
+            } else if (data.paymenttrembalance == 'RTGS') {
+                lcinterestcostINR = 0.00;
+                lcinterestcostCent = 0.00;
+            }
+            console.log('totalvalue:', totalvalue);
+            console.log('rfidCostINR:', data.rfidCostINR);
+            console.log('moduleOverheadINR:', data.moduleOverheadINR);
+            console.log('moduleFinanceINR:', data.moduleFinanceINR);
+            console.log('cellBOMINR:', data.cellBOMINR);
+            console.log('cellOverheadINR:', data.cellOverheadINR);
+            console.log('cellFinanceINR:', data.cellFinanceINR);
+            console.log('moduleWarrantyInsuranceCostINR:', moduleWarrantyInsuranceCostINR);
+            console.log('bGradeModuleLossINR:', bGradeModuleLossINR);
+            console.log('abgCostINR:', abgCostINR);
+            console.log('pbgCostINR:', pbgCostINR);
+            console.log('outboundlogistics:', data.outboundlogisticsINR);
+            console.log('exportfreightchargesINR:', data.exportfreightchargesINR);
+            console.log('transitinsurancecostINR:', transitinsurancecostINR);
+            console.log('lcinterestcostINR:', lcinterestcostINR);
+
+
+            //const totalforebitda = (parseFloat(totalvalue) + parseFloat(data.rfidCostINR) + parseFloat(data.moduleOverheadINR) + parseFloat(data.moduleFinanceINR) + parseFloat(data.cellBOMINR) + parseFloat(data.cellOverheadINR) + parseFloat(data.cellFinanceINR) + parseFloat(moduleWarrantyInsuranceCostINR) + parseFloat(bGradeModuleLossINR) + parseFloat(abgCostINR) + parseFloat(pbgCostINR) + parseFloat(data.outboundlogistics) + parseFloat(data.exportfreightchargesINR) + parseFloat(transitinsurancecostINR) + parseFloat(lcinterestcostINR));
+            // totalforebitda = totalforebitda.toFixed(2);
+            const totalforebitda =
+                totalvalue +
+                data.rfidCostINR +
+                data.moduleOverheadINR +
+                data.moduleFinanceINR +
+                data.cellBOMINR +
+                data.cellOverheadINR +
+                data.cellFinanceINR +
+                moduleWarrantyInsuranceCostINR +
+                bGradeModuleLossINR +
+                abgCostINR +
+                pbgCostINR +
+                data.outboundlogisticsINR +
+                data.exportfreightchargesINR +
+                transitinsurancecostINR +
+                lcinterestcostINR;
+
+
+            console.log('totalforebitda--> : ', totalforebitda);
+            console.log('data.ebitda--> : ', data.ebitda);
+            const ebitdaINR = Number(((data.ebitda / 100) * (totalforebitda - data.moduleFinanceINR)).toFixed(2));
+            const ebitdaCent = (ebitdaINR * 100 / data.rbi).toFixed(2);
+            const pbtINR = Number((ebitdaINR - data.moduleFinanceINR).toFixed(2));
+            const pbtCent = (pbtINR * 100 / data.rbi).toFixed(2);
+            console.log('pbtINR--> : ', pbtINR);
+
+            const finalpriceINR = (totalforebitda + parseFloat(pbtINR)).toFixed(2);
+            const finalpriceCent = (finalpriceINR * 100 / data.rbi).toFixed(2);
+            console.log('data.rfidCostINR : ', data.rfidCostINR);
+            console.log('data.moduleOverheadINR : ', data.moduleOverheadINR);
+            console.log('outboundlogisticsINR--> : ', data.outboundlogisticsINR);
+            let formatrfidCostINR = this.formatDecimal(data.rfidCostINR);
+
+            this.costRows = [
+                { label: 'RFID reader cost', col2: formatrfidCostINR, col3: this.formatDecimal(data.rfidCostCents) },
+                { label: 'Module Overhead cost (cents/Wp)', col2: this.formatDecimal(data.moduleOverheadINR), col3: this.formatDecimal(data.moduleOverheadCents) },
+                { label: 'Module Finance Cost(Cents/Wp)', col2: this.formatDecimal(data.moduleFinanceINR), col3: this.formatDecimal(data.moduleFinanceCents) },
+                { label: 'Cell BOM Cost (Cents/Wp)', col2: this.formatDecimal(data.cellBOMINR), col3: this.formatDecimal(data.cellBOMCents) },
+                { label: 'Cell - Overhead Cost (Cents/Wp)', col2: this.formatDecimal(data.cellOverheadINR), col3: this.formatDecimal(data.cellOverheadCents) },
+                { label: 'Cell- Finance Cost(Cents/Wp)', col2: this.formatDecimal(data.cellFinanceINR), col3: this.formatDecimal(data.cellFinanceCents) },
+                { label: 'Module Warranty insurance Cost', col2: moduleWarrantyInsuranceCostINR, col3: moduleWarrantyInsuranceCostCent },
+                { label: 'B-Grade Module Loss', col2: this.formatDecimal(bGradeModuleLossINR), col3: this.formatDecimal(bGradeModuleLossCent) },
+                { label: 'ABG Cost', col2: abgCostINR, col3: abgCostCent },
+                { label: 'PBG Cost', col2: pbgCostINR, col3: pbgCostCent },
+                { label: 'outbound logistics', col2: this.formatDecimal(data.outboundlogisticsINR), col3: this.formatDecimal(data.outboundlogisticsCent) },
+                { label: 'Export Freight Charges', col2: this.formatDecimal(data.exportfreightchargesINR), col3: this.formatDecimal(data.exportfreightchargesCent) },
+                { label: 'Transit Insurance Cost', col2: this.formatDecimal(transitinsurancecostINR), col3: this.formatDecimal(transitinsurancecostCent) },
+                { label: 'LC Interest Cost', col2: this.formatDecimal(lcinterestcostINR), col3: this.formatDecimal(lcinterestcostCent) },
+                { label: 'EBITDA Margin', col2: ebitdaINR, col3: ebitdaCent },
+                { label: 'PBT Margin', col2: pbtINR, col3: pbtCent },
+                { label: 'FINAL Wp PRICE', col2: finalpriceINR, col3: finalpriceCent }
+            ];
+
+            // Save finalpriceINR in costDataMap so it can be accessed in updateSummary
+            const currentOliId = this.currentProduct.oliId;
+            const existingCostData = this.costDataMap.get(currentOliId) || {};
+            const clonedCostData = { ...existingCostData, finalpriceINR: parseFloat(finalpriceINR), finalpriceCent: parseFloat(finalpriceCent), totalforebitda: parseFloat(totalforebitda), moduleFinanceINR: parseFloat(data.moduleFinanceINR) };
+            this.costDataMap.set(currentOliId, clonedCostData);
+            console.log('costDataMap---> : ', JSON.stringify(Array.from(this.costDataMap.entries())));
+
+            this.updateSummary();
         }
-        var bGradeModuleLossINR = ((totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR) * (data.bgrademodulediscount / 100) * (data.bgrademoduleyield / 100));
-        var bGradeModuleLossCent = ((bGradeModuleLossINR * 100) / data.rbi);
-        bGradeModuleLossINR = Number(bGradeModuleLossINR.toFixed(2));
-        bGradeModuleLossCent = bGradeModuleLossCent.toFixed(2);
-        const abgCostINR = Number((
-            (parseFloat(data.abgvalue) || 0) *
-            (parseFloat(data.abgpbgcost / 100) || 0) /
-            365 *
-            (parseFloat(data.abgvalidity) || 0) /
-            (parseFloat(data.projectcapacity) || 1) /
-            1000000
-        ).toFixed(2));
-        const abgCostCent = ((abgCostINR * 100) / data.rbi).toFixed(2);
-        console.log('data.pbgvalue--> : ', data.pbgvalue);
-        console.log('data.abgpbgcost--> : ', data.abgpbgcost);
-        console.log('data.pbgvalidity--> : ', data.pbgvalidity);
-        console.log('data.projectcapacity--> : ', data.projectcapacity);
-        const pbgCostINR = Number((
-            (parseFloat(data.pbgvalue) || 0) *
-            (parseFloat(data.abgpbgcost / 100) || 0) /
-            365 *
-            (parseFloat(data.pbgvalidity) || 0) /
-            (parseFloat(data.projectcapacity) || 1) /
-            1000000
-        ).toFixed(2));
-
-        const pbgCostCent = ((pbgCostINR * 100) / data.rbi).toFixed(2);
-        console.log('data.insurancepremiumcost--> : ', data.insurancepremiumcost);
-        var transitinsurancecostINR = parseFloat(totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.moduleFinanceINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR + bGradeModuleLossINR + abgCostINR + pbgCostINR + data.outboundlogisticsINR + data.exportfreightchargesINR) * (data.insurancepremiumcost / 100);
-        var transitinsurancecostCent = (transitinsurancecostINR * 100 / data.rbi);
-        transitinsurancecostINR = Number(transitinsurancecostINR.toFixed(2));
-        console.log('transitinsurancecostINR--> : ', transitinsurancecostINR);
-        transitinsurancecostCent = transitinsurancecostCent.toFixed(2);
-        console.log('data.paymentterm--> : ', data.paymentterm);
-        console.log('data.lcinterestcost--> : ', data.lcinterestcost);
-        console.log('data.lcusanceperiod--> : ', data.lcusanceperiod);
-        const sumforlcinterest = parseFloat(totalvalue + data.rfidCostINR + data.moduleOverheadINR + data.moduleFinanceINR + data.cellBOMINR + data.cellOverheadINR + data.cellFinanceINR + moduleWarrantyInsuranceCostINR + bGradeModuleLossINR + abgCostINR + pbgCostINR + data.outboundlogisticsINR + data.exportfreightchargesINR);
-        let lcinterestcostINR = 0.00;
-        let lcinterestcostCent = 0.00;
-        if (data.paymenttrembalance == 'LC') {
-            lcinterestcostINR = (
-                (parseFloat(sumforlcinterest)) *
-                (parseFloat(1 - (data.paymentterm / 100))) *
-                parseFloat(data.lcinterestcost / 100) / 365 *
-                parseFloat(data.lcusanceperiod)
-            );
-            lcinterestcostINR = Number(lcinterestcostINR.toFixed(2));
-            lcinterestcostCent = (lcinterestcostINR * 100 / data.rbi).toFixed(2);
-        } else if (data.paymenttrembalance == 'RTGS') {
-            lcinterestcostINR = 0.00;
-            lcinterestcostCent = 0.00;
-        }
-        console.log('totalvalue:', totalvalue);
-        console.log('rfidCostINR:', data.rfidCostINR);
-        console.log('moduleOverheadINR:', data.moduleOverheadINR);
-        console.log('moduleFinanceINR:', data.moduleFinanceINR);
-        console.log('cellBOMINR:', data.cellBOMINR);
-        console.log('cellOverheadINR:', data.cellOverheadINR);
-        console.log('cellFinanceINR:', data.cellFinanceINR);
-        console.log('moduleWarrantyInsuranceCostINR:', moduleWarrantyInsuranceCostINR);
-        console.log('bGradeModuleLossINR:', bGradeModuleLossINR);
-        console.log('abgCostINR:', abgCostINR);
-        console.log('pbgCostINR:', pbgCostINR);
-        console.log('outboundlogistics:', data.outboundlogisticsINR);
-        console.log('exportfreightchargesINR:', data.exportfreightchargesINR);
-        console.log('transitinsurancecostINR:', transitinsurancecostINR);
-        console.log('lcinterestcostINR:', lcinterestcostINR);
-
-
-        //const totalforebitda = (parseFloat(totalvalue) + parseFloat(data.rfidCostINR) + parseFloat(data.moduleOverheadINR) + parseFloat(data.moduleFinanceINR) + parseFloat(data.cellBOMINR) + parseFloat(data.cellOverheadINR) + parseFloat(data.cellFinanceINR) + parseFloat(moduleWarrantyInsuranceCostINR) + parseFloat(bGradeModuleLossINR) + parseFloat(abgCostINR) + parseFloat(pbgCostINR) + parseFloat(data.outboundlogistics) + parseFloat(data.exportfreightchargesINR) + parseFloat(transitinsurancecostINR) + parseFloat(lcinterestcostINR));
-        // totalforebitda = totalforebitda.toFixed(2);
-        const totalforebitda =
-            totalvalue +
-            data.rfidCostINR +
-            data.moduleOverheadINR +
-            data.moduleFinanceINR +
-            data.cellBOMINR +
-            data.cellOverheadINR +
-            data.cellFinanceINR +
-            moduleWarrantyInsuranceCostINR +
-            bGradeModuleLossINR +
-            abgCostINR +
-            pbgCostINR +
-            data.outboundlogisticsINR +
-            data.exportfreightchargesINR +
-            transitinsurancecostINR +
-            lcinterestcostINR;
-
-
-        console.log('totalforebitda--> : ', totalforebitda);
-        console.log('data.ebitda--> : ', data.ebitda);
-        const ebitdaINR = Number(((data.ebitda / 100) * (totalforebitda - data.moduleFinanceINR)).toFixed(2));
-        const ebitdaCent = (ebitdaINR * 100 / data.rbi).toFixed(2);
-        const pbtINR = Number((ebitdaINR - data.moduleFinanceINR).toFixed(2));
-        const pbtCent = (pbtINR * 100 / data.rbi).toFixed(2);
-        console.log('pbtINR--> : ', pbtINR);
-
-        const finalpriceINR = (totalforebitda + parseFloat(pbtINR)).toFixed(2);
-        const finalpriceCent = (finalpriceINR * 100 / data.rbi).toFixed(2);
-        console.log('data.rfidCostINR : ', data.rfidCostINR);
-        console.log('data.moduleOverheadINR : ', data.moduleOverheadINR);
-        console.log('outboundlogisticsINR--> : ', data.outboundlogisticsINR);
-        this.costRows = [
-            { label: 'RFID reader cost', col2: data.rfidCostINR, col3: data.rfidCostCents },
-            { label: 'Module Overhead cost (cents/Wp)', col2: data.moduleOverheadINR, col3: data.moduleOverheadCents },
-            { label: 'Module Finance Cost(Cents/Wp)', col2: data.moduleFinanceINR, col3: data.moduleFinanceCents },
-            { label: 'Cell BOM Cost (Cents/Wp)', col2: data.cellBOMINR, col3: data.cellBOMCents },
-            { label: 'Cell - Overhead Cost (Cents/Wp)', col2: data.cellOverheadINR, col3: data.cellOverheadCents },
-            { label: 'Cell- Finance Cost(Cents/Wp)', col2: data.cellFinanceINR, col3: data.cellFinanceCents },
-            { label: 'Module Warranty insurance Cost', col2: moduleWarrantyInsuranceCostINR, col3: moduleWarrantyInsuranceCostCent },
-            { label: 'B-Grade Module Loss', col2: bGradeModuleLossINR, col3: bGradeModuleLossCent },
-            { label: 'ABG Cost', col2: abgCostINR, col3: abgCostCent },
-            { label: 'PBG Cost', col2: pbgCostINR, col3: pbgCostCent },
-            { label: 'outbound logistics', col2: data.outboundlogisticsINR, col3: data.outboundlogisticsCent },
-            { label: 'Export Freight Charges', col2: data.exportfreightchargesINR, col3: data.exportfreightchargesCent },
-            { label: 'Transit Insurance Cost', col2: transitinsurancecostINR, col3: transitinsurancecostCent },
-            { label: 'LC Interest Cost', col2: lcinterestcostINR, col3: lcinterestcostCent },
-            { label: 'EBITDA Margin', col2: ebitdaINR, col3: ebitdaCent },
-            { label: 'PBT Margin', col2: pbtINR, col3: pbtCent },
-            { label: 'FINAL Wp PRICE', col2: finalpriceINR, col3: finalpriceCent }
-        ];
-        // Save finalpriceINR in costDataMap so it can be accessed in updateSummary
-        const currentOliId = this.currentProduct.oliId;
-        const existingCostData = this.costDataMap.get(currentOliId) || {};
-        const clonedCostData = { ...existingCostData, finalpriceINR: parseFloat(finalpriceINR), finalpriceCent: parseFloat(finalpriceCent), totalforebitda: parseFloat(totalforebitda), moduleFinanceINR: parseFloat(data.moduleFinanceINR) };
-        this.costDataMap.set(currentOliId, clonedCostData);
-        console.log('costDataMap---> : ', JSON.stringify(Array.from(this.costDataMap.entries())));
-
-        this.updateSummary();
 
 
     }
@@ -571,10 +987,22 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
 
     handleCountryChange(event) {
         this.countrySource = event.detail.value;
+        updateCountry({ country: this.countrySource, oppId: this.recordId }).
+            then(result => {
+                console.log('result country : ', result);
+            }).catch(error => {
+                console.log('error country : ', error);
+            });
     }
 
     handlePricingChange(event) {
         this.pricingType = event.detail.value;
+        updatePricingType({ type: this.pricingType, oppId: this.recordId }).
+            then(result => {
+                console.log('result type : ', result);
+            }).catch(error => {
+                console.log('error type : ', error);
+            });
     }
 
     handleNext() {
@@ -687,7 +1115,21 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
 
 
     formatDecimal(value) {
-        return value?.toFixed(2) || '0.00';
+        // return value?.toFixed(2) || '0.00';
+        if (typeof value !== 'number') return '0.00';
+
+        const scaled = value * 1000;
+        const thirdDigit = Math.floor(scaled) % 10;
+        const base = Math.floor(value * 100);
+
+        let result;
+        if (thirdDigit > 5) {
+            result = (base + 1) / 100; // round up
+        } else {
+            result = base / 100;
+        }
+
+        return result.toFixed(2) || 0.00;
     }
 
     formatCurrency(value, currency) {
@@ -702,17 +1144,48 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
     handleupdate() {
         console.log('recordId--> : ', this.recordId);
         console.log('finalprice--> : ', this.summaryTotals.finalPrice);
+        console.log('finalPriceinCent--> : ', this.summaryTotals.finalPriceinCent);
         console.log('ebita--> : ', this.summaryTotals.totalforebitda);
         console.log('moduleFinanceINR--> : ', this.summaryTotals.moduleFinanceINR);
         console.log('OUTPUT : ',);
-        updatefinals({ recordId: this.recordId, finalprice: this.summaryTotals.finalPrice, pbtvalue: this.summaryTotals.totalforebitda, moduleFinanceINR: this.summaryTotals.moduleFinanceINR }).then(result => {
-            console.log('result : ', result);
-            this.showSuccessToast('Updated successfully!');
-            this.closeModal();
-        }).catch(error => {
-            console.log('error : ', error);
-             this.showErrorToast('Updation Failed');
-        })
+        if (this.isUpdateByNationalHead == false) {
+            updatefinals({ recordId: this.recordId, finalprice: this.summaryTotals.finalPrice, finalpricecent: this.summaryTotals.finalPriceinCent, pbtvalue: this.summaryTotals.totalforebitda, moduleFinanceINR: this.summaryTotals.moduleFinanceINR, freight: this.freight }).then(result => {
+                console.log('result updatefinals: ', result);
+                savePricingData({ recordId: this.recordId, rawJson: JSON.stringify(this.oliData[this.activeIndex]), costRows: JSON.stringify(this.costRows), inboundlog: JSON.stringify(this.filteredData), seaFreightData: JSON.stringify(this.seaFreightData), inlandTransportData: JSON.stringify(this.inlandTransportData), financialParams: JSON.stringify(this.financialParams), aopEbitda: JSON.stringify(this.segments), preEbitda: JSON.stringify(this.segmentspre), indiaPro: JSON.stringify(this.filteredDataIndiapdate), cmvPro: JSON.stringify(this.filteredDataCMVUpdate), package2040: JSON.stringify(this.rawdata), outboundlog: JSON.stringify(this.outboundlogisticattachment) })
+                    .then((result) => {
+                        console.log('Save pricing data by Kam: ', result);
+                    })
+                    .catch(error => {
+                        console.log('error saving by kam: ', error);
+                    });
+                this.showSuccessToast('Updated successfully!');
+                this.closeModal();
+
+            }).catch(error => {
+                console.log('error updatefinals: ', error);
+                this.showErrorToast('Updation Failed');
+            })
+        }
+
+        if (this.isUpdateByNationalHead == true) {
+            updateFinalWPbyNH({ recordId: this.recordId, pbtvalue: this.summaryTotals.totalforebitda, moduleFinanceINR: this.summaryTotals.moduleFinanceINR }).then(result => {
+                console.log('result updateFinalWPbyNH : ', result);
+                if (this.isLockPrice == false) {
+                    savePricingData({ recordId: this.recordId, rawJson: JSON.stringify(this.oliData[this.activeIndex]), costRows: JSON.stringify(this.costRows), inboundlog: JSON.stringify(this.filteredData), seaFreightData: JSON.stringify(this.seaFreightData), inlandTransportData: JSON.stringify(this.inlandTransportData), financialParams: JSON.stringify(this.financialParams), aopEbitda: JSON.stringify(this.segments), preEbitda: JSON.stringify(this.segmentspre), indiaPro: JSON.stringify(this.filteredDataIndiapdate), cmvPro: JSON.stringify(this.filteredDataCMVUpdate), package2040: JSON.stringify(this.rawdata), outboundlog: JSON.stringify(this.outboundlogisticattachment) })
+                        .then((result) => {
+                            console.log('Save pricing data by kam: ', result);
+                        })
+                        .catch(error => {
+                            console.log('error saving by kam: ', error);
+                        });
+                }
+                this.showSuccessToast('Updated successfully!');
+                this.closeModal();
+            }).catch(error => {
+                console.log('error updateFinalWPbyNH : ', error);
+                this.showErrorToast('Updation Failed');
+            })
+        }
     }
     showSuccessToast(message) {
         const event = new ShowToastEvent({
@@ -733,7 +1206,7 @@ export default class RawMaterialLogger extends NavigationMixin(LightningElement)
             },
         });
     }
-     showErrorToast(message) {
+    showErrorToast(message) {
         const event = new ShowToastEvent({
             title: 'Error',
             message: message,

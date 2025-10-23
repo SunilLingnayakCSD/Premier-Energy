@@ -9,7 +9,7 @@ public with sharing class OrderCapacityController {
 
         // Get Account Info
         Account acc = [
-            SELECT Id, Premier_Business_Entity__c, Plant_Name__c, Plant_Name1__c, Plant_Name2__c, Plant_Name3__c
+            SELECT Id, Premier_Business_Entity__c, Plant_Name__c
             FROM Account
             WHERE Id = :accountId
             LIMIT 1
@@ -17,7 +17,7 @@ public with sharing class OrderCapacityController {
 
         // Step 1: Get Annual Capacity from Custom Metadata
         List<String> plantNames = new List<String>{
-            acc.Plant_Name__c, acc.Plant_Name1__c, acc.Plant_Name2__c, acc.Plant_Name3__c
+            acc.Plant_Name__c
         };
 
         Set<String> plantNameSet = new Set<String>();
@@ -27,9 +27,9 @@ public with sharing class OrderCapacityController {
             }
         }
 
-        for (Plant_Capacity_Metadata__mdt meta : [
+        for (Plant_with_Pincode__mdt meta : [
             SELECT Company__c, Plant_Name__c, Capacity__c
-            FROM Plant_Capacity_Metadata__mdt
+            FROM Plant_with_Pincode__mdt
             WHERE Company__c = :acc.Premier_Business_Entity__c
         ]) {
             if (plantNameSet.contains(meta.Plant_Name__c)) {
@@ -49,7 +49,7 @@ public with sharing class OrderCapacityController {
             }
         }
 
-        Id purchaseOrderRecordTypeId = Schema.SObjectType.Order.getRecordTypeInfosByDeveloperName().get('Purchase_Order').getRecordTypeId();
+        Id purchaseOrderRecordTypeId = Schema.SObjectType.Order.getRecordTypeInfosByDeveloperName().get('Sales_Order').getRecordTypeId();
         System.debug('Retrieved RecordTypeId: ' + purchaseOrderRecordTypeId);
 
 

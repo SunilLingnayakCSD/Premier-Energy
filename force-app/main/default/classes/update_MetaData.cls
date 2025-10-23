@@ -1,4 +1,4 @@
-public with sharing class update_MetaData {
+public without sharing class update_MetaData {
     @AuraEnabled(cacheable=true)
     public static List<Input_Admin__mdt> metadataUpdate() {
         return [
@@ -35,7 +35,7 @@ public with sharing class update_MetaData {
         mdContainer.addMetadata(customMetadata);
         
         if (!Test.isRunningTest()) {
-            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, null); 
+            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, null);
         }
     }
 }

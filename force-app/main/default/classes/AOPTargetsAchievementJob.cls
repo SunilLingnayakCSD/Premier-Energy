@@ -11,7 +11,7 @@ global class AOPTargetsAchievementJob implements Schedulable, Database.Batchable
             SELECT Id, Distributor_Account__c
             FROM AOP_Targets__c
             WHERE Distributor_Account__c != null
-            AND Distributor_Account__r.RecordType.DeveloperName = 'Distributor'
+           // AND Distributor_Account__r.RecordType.DeveloperName = 'Distributor'
         ]);
     }
 

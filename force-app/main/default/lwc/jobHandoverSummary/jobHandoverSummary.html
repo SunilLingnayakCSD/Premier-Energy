@@ -1,0 +1,11 @@
+<template>
+    <!--<lightning-card title="Job Handover Summary" icon-name="standard:opportunity">-->
+       
+        <template if:true={recordId}>
+        <iframe src={vfPageUrl} width="100%" height="2300px" onload={handleIframeLoad}></iframe>
+    </template>
+    <template if:false={recordId}>
+        <p>Loading...</p>
+    </template>
+   <!-- </lightning-card>-->
+</template>

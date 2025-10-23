@@ -3,3 +3,11 @@
     font-size: 14px;
     color: white;
 }
+.scroll{
+    scroll-behavior: auto;
+    overflow-y: scroll;
+    max-height: 450px;
+}
+.spaced-point {
+    margin-bottom: 1rem; /* Adjust to your desired spacing */
+}

@@ -1,0 +1,172 @@
+/* .custom-container{
+	color : black;
+} */
+
+
+/*.slds-card {
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.slds-card__header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dddbda;
+}
+
+.slds-table th {
+    background-color: #f3f3f3;
+    font-weight: 700;
+}
+
+.slds-button.slds-button_brand {
+    background-color: #4bca81;
+}
+
+.slds-button.slds-button_destructive {
+    background-color: #c23934;
+}
+
+.slds-button.slds-button_neutral {
+    background-color: #ffffff;
+    border: 1px solid #dddbda;
+}
+
+.slds-modal__container {
+    max-width: 35rem;
+}
+
+.slds-modal__content {
+    padding: 1rem 2rem;
+}
+
+.slds-modal__footer {
+    padding: 0.75rem 2rem;
+    border-top: 1px solid #dddbda;
+}
+
+.slds-text-title_bold {
+    font-weight: bold;
+}
+
+.slds-align_absolute-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slds-p-around_medium {
+    padding: 1rem;
+}
+
+.save-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  height: 100%;        
+}
+
+.action-column{
+	padding-left: 55px;
+}
+
+.actionn-buttons{
+  padding-left: 55px;
+}*/
+
+.slds-card {
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.slds-card__header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dddbda;
+}
+
+.slds-table th {
+    background-color: #f3f3f3;
+    font-weight: 700;
+}
+
+.slds-button.slds-button_brand {
+    background-color: #4bca81;
+}
+
+.slds-button.slds-button_destructive {
+    background-color: #c23934;
+}
+
+.slds-button.slds-button_neutral {
+    background-color: #ffffff;
+    border: 1px solid #dddbda;
+}
+
+.slds-modal__container {
+    max-width: 35rem;
+}
+
+.slds-modal__content {
+    padding: 1rem 2rem;
+}
+
+.slds-modal__footer {
+    padding: 0.75rem 2rem;
+    border-top: 1px solid #dddbda;
+}
+
+.slds-text-title_bold {
+    font-weight: bold;
+}
+
+.slds-align_absolute-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slds-p-around_medium {
+    padding: 1rem;
+}
+
+.save-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.action-column {
+    padding-left: 55px;
+}
+
+.actionn-buttons {
+    padding-left: 55px;
+}
+
+/* ✅ NEW: Scrolling Table Container */
+.table-container {
+    max-height: 400px; /* Adjust as needed */
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #d8dde6;
+    margin-top: 10px;
+}
+
+/* Optional: fix header while scrolling */
+.table-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f3f3f3;
+}
+.inline-edit-text {
+    cursor: pointer;
+    padding: 4px;
+}
+
+.inline-edit-text.editable:hover {
+    background-color: #f3f2f2;
+    border-radius: 3px;
+}

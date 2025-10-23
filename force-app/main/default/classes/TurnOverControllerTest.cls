@@ -1,193 +1,189 @@
-@isTest
+@IsTest
 public class TurnOverControllerTest {
-
+    
     @TestSetup
-    static void setupBaseData() {
-        Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
-        String uniqueUsername = 'testuser' + System.currentTimeMillis() + '@testorg.com';
-        User testUser = new User(
-            Alias = 'testu',
-            Email = 'testuser@testorg.com',
-            EmailEncodingKey = 'UTF-8',
-            LastName = 'Testing',
-            LanguageLocaleKey = 'en_US',
-            LocaleSidKey = 'en_US',
+    static void setupTestData() {
+        // Create Account
+        Account distributor = new Account(
+            Name = 'Test Distributor',
+            Customer_GST_Number__c = 'GST123'
+        );
+        insert distributor;
+        
+        // Create Contact
+        Contact distributorContact = new Contact(
+            FirstName = 'Test',
+            LastName = 'Contact',
+            Email = 'test@example.com',
+            AccountId = distributor.Id
+        );
+        insert distributorContact;
+        
+        // Create User
+        Profile p = [SELECT Id,Name FROM Profile WHERE Name = 'Partner Distributor Access' LIMIT 1];
+        User distributorUser = new User(
+            Alias = 'dist',
+            Email = 'testuser@example.com',
+            LastName = 'Distributor',
+            Username = 'distributor' + DateTime.now().getTime() + '@example.com',
             ProfileId = p.Id,
             TimeZoneSidKey = 'America/Los_Angeles',
-            UserName = uniqueUsername
+            LocaleSidKey = 'en_US',
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US',
+            ContactId = distributorContact.Id
         );
-        insert testUser;
-    }
-
-    static void setupTestData() {
-        // Get current user to set as owner/creator
-        Id currentUserId = UserInfo.getUserId();
+        insert distributorUser;
         
-        Pricebook2 standardPricebook = new Pricebook2(
+        // Create Products
+        Product2 dcrProduct = new Product2(
+            Name = 'DCR Product',
+           // DCR_NonDCR__c = 'DCR',
+            Wp__c = 100,
+            IsActive = true
+        );
+        Product2 ndcrProduct = new Product2(
+            Name = 'NDCR Product',
+           // DCR_NonDCR__c = 'NDCR',
+            Wp__c = 150,
+            IsActive = true
+        );
+        insert new List<Product2>{dcrProduct, ndcrProduct};
+        
+        // Create Pricebook Entries
+        
+        Pricebook2 stdPb = new Pricebook2(
             Id = Test.getStandardPricebookId(),
             IsActive = true
         );
-        update standardPricebook;
-
-        List<Product2> products = new List<Product2>();
+        update stdPb;
+        PricebookEntry dcrPbe = new PricebookEntry(
+            Pricebook2Id = stdPb.Id,
+            Product2Id = dcrProduct.Id,
+            UnitPrice = 100,
+            IsActive = true
+        );
+        PricebookEntry ndcrPbe = new PricebookEntry(
+            Pricebook2Id = stdPb.Id,
+            Product2Id = ndcrProduct.Id,
+            UnitPrice = 150,
+            IsActive = true
+        );
+        insert new List<PricebookEntry>{dcrPbe, ndcrPbe};
+        
+        // Create Turnover Discounts
+        Date today = Date.today();
+        List<TurnOver_Discounts__c> discounts = new List<TurnOver_Discounts__c>();
+        
+        // Monthly discount
+        discounts.add(new TurnOver_Discounts__c(
+            Distributor__c = distributor.Id,
+            Period__c = 'Month',
+            Valid_From__c = today.toStartOfMonth(),
+            Valid_To__c = today.toStartOfMonth().addMonths(1).addDays(-1),
+            Target_Unit__c = 20,
+            To_Target__c = 1,
+            Payout__c = 0.05,
+            Payout_NDCR__c = 0.03
+        ));
+        
+        // Quarterly discount
+        discounts.add(new TurnOver_Discounts__c(
+            Distributor__c = distributor.Id,
+            Period__c = 'Quarter',
+            Valid_From__c = today.toStartOfMonth(),
+            Valid_To__c = today.toStartOfMonth().addMonths(3).addDays(-1),
+            Target_Unit__c = 30,
+            To_Target__c = 5,
+            Payout__c = 0.07,
+            Payout_NDCR__c = 0.05
+        ));
+        
+        // Yearly discount
+        discounts.add(new TurnOver_Discounts__c(
+            Distributor__c = distributor.Id,
+            Period__c = 'Year',
+            Valid_From__c = Date.newInstance(today.year(), 4, 1),
+            Valid_To__c = Date.newInstance(today.year() + 1, 3, 31),
+            Target_Unit__c = 90,
+            To_Target__c = 20,
+            Payout__c = 0.10,
+            Payout_NDCR__c = 0.08
+        ));
+        insert discounts;
+        
+        // Create Invoices
+        List<Invoice__c> invoices = new List<Invoice__c>();
         for (Integer i = 0; i < 3; i++) {
-            products.add(new Product2(
-                Name = 'Test Product ' + i, 
-                IsActive = true
+            invoices.add(new Invoice__c(
+                Account__c = distributor.Id,
+                Invoice_Date__c = today,
+                Status__c = 'Request'
             ));
         }
-        insert products;
-
-        List<PricebookEntry> standardEntries = new List<PricebookEntry>();
-        for (Product2 p : products) {
-            standardEntries.add(new PricebookEntry(
-                Product2Id = p.Id,
-                Pricebook2Id = standardPricebook.Id,
-                UnitPrice = 100.0,
-                IsActive = true
+        insert invoices;
+        
+        // Create Invoice Line Items
+        List<Invoice_Line_Item__c> lineItems = new List<Invoice_Line_Item__c>();
+        for (Invoice__c inv : invoices) {
+            lineItems.add(new Invoice_Line_Item__c(
+                Invoice__c = inv.Id,
+                Product__c = dcrProduct.Id,
+                Quantity__c = 1000  // 1000 * 100W = 100,000W = 0.1 MWp
+            ));
+            lineItems.add(new Invoice_Line_Item__c(
+                Invoice__c = inv.Id,
+                Product__c = ndcrProduct.Id,
+                Quantity__c = 1000  // 1000 * 150W = 150,000W = 0.15 MWp
             ));
         }
-        insert standardEntries;
-
-        Account distributor = new Account(Name = 'Test Distributor');
-        insert distributor;
-
-        List<TurnOver_Discounts__c> turnoverRecords = new List<TurnOver_Discounts__c>();
-        for (String period : new List<String>{'Month', 'Quarter', 'Year'}) {
-            turnoverRecords.add(new TurnOver_Discounts__c(
-                Distributor__c = distributor.Id,
-                Material_No__c = 'MAT-001',
-                Payout__c = 50,
-                Payout_Type__c = 'Fixed',
-                Period__c = period,
-                Target_Unit__c = 100,
-                Achieved__c = 80,
-                OwnerId = currentUserId  // Set owner to current user
-            ));
-        }
-        insert turnoverRecords;
+        insert lineItems;
     }
-
-    @isTest
-    static void testGetFilteredTurnover() {
-        User testUser = [SELECT Id FROM User WHERE Email = 'testuser@testorg.com' LIMIT 1];
-
-        System.runAs(testUser) {
-            setupTestData();
-            
-            Date startDate = Date.today().addDays(-5);
-            Date endDate = Date.today().addDays(5);
-
-            Test.startTest();
-            Map<String, List<TurnOver_Discounts__c>> resultMap = TurnOverController.getFilteredTurnover(startDate, endDate);
-            Test.stopTest();
-
-            System.assertNotEquals(null, resultMap, 'Result map should not be null');
-            System.assertEquals(3, resultMap.keySet().size(), 'Should have 3 periods (Month, Quarter, Year)');
-            System.assertEquals(1, resultMap.get('Month').size(), 'Month should have 1 record');
-            System.assertEquals(1, resultMap.get('Quarter').size(), 'Quarter should have 1 record');
-            System.assertEquals(1, resultMap.get('Year').size(), 'Year should have 1 record');
-        }
-    }
-
-    @isTest
-    static void testGetProductsByMonthYear_WithDates() {
-        User testUser = [SELECT Id FROM User WHERE Email = 'testuser@testorg.com' LIMIT 1];
-
-        System.runAs(testUser) {
-            setupTestData();
-
-            Test.startTest();
-            List<TurnOverController.ProductWrapper> productsWithDates = TurnOverController.getProductsByMonthYear(
-                Date.today().year(), Date.today().month(), Date.today().year(), Date.today().month()
-            );
-            Test.stopTest();
-
-            // Should return products created today by the current user
-            System.assert(productsWithDates.size() >= 0, 'Should return products for current date range');
-            
-            // Test ProductWrapper constructor coverage
-            for (TurnOverController.ProductWrapper pw : productsWithDates) {
-                System.assert(pw.productId != null, 'Product Id should not be null');
-                System.assert(pw.productName != null, 'Product name should not be null');
-                System.assert(pw.price != null, 'Price should not be null');
-            }
-        }
-    }
-
-    @isTest
-    static void testGetProductsByMonthYear_WithoutDates() {
-        User testUser = [SELECT Id FROM User WHERE Email = 'testuser@testorg.com' LIMIT 1];
-
-        System.runAs(testUser) {
-            setupTestData();
-
-            Test.startTest();
-            List<TurnOverController.ProductWrapper> productsWithoutDates = TurnOverController.getProductsByMonthYear(
-                null, null, null, null
-            );
-            Test.stopTest();
-
-            // Test ProductWrapper constructor and for loop coverage
-            for (TurnOverController.ProductWrapper pw : productsWithoutDates) {
-                System.assert(pw.productName.startsWith('Test Product'), 'Product name should match pattern');
-                System.assert(pw.price > 0, 'Price should be positive');
-                System.assert(pw.productId != null, 'Product Id should not be null');
-            }
-        }
-    }
-
-    @isTest
-    static void testGetFilteredTurnover_EmptyResults() {
-        User testUser = [SELECT Id FROM User WHERE Email = 'testuser@testorg.com' LIMIT 1];
-
-        System.runAs(testUser) {
-            // Don't setup test data to test empty result scenario
-            Date startDate = Date.today().addDays(-5);
-            Date endDate = Date.today().addDays(5);
-
-            Test.startTest();
-            Map<String, List<TurnOver_Discounts__c>> resultMap = TurnOverController.getFilteredTurnover(startDate, endDate);
-            Test.stopTest();
-
-            System.assertNotEquals(null, resultMap, 'Result map should not be null');
-            System.assertEquals(0, resultMap.keySet().size(), 'Should have 0 periods when no data');
-        }
-    }
-
-    @isTest
-    static void testProductWrapper_Constructor() {
-        // Direct test of ProductWrapper constructor to ensure 100% coverage
+    
+  //1
+  
+    @IsTest
+    static void testGetFilteredTurnoverYearly() {
+        User distributorUser = [SELECT Id FROM User WHERE LastName = 'Distributor' LIMIT 1];
+        
         Test.startTest();
-        
-        Id testId = '01t000000000000AAA'; // Sample Product2 Id
-        String testName = 'Test Product Name';
-        Decimal testPrice = 99.99;
-        
-        TurnOverController.ProductWrapper wrapper = new TurnOverController.ProductWrapper(testId, testName, testPrice);
-        
-        Test.stopTest();
-        
-        System.assertEquals(testId, wrapper.productId, 'Product ID should match');
-        System.assertEquals(testName, wrapper.productName, 'Product name should match');
-        System.assertEquals(testPrice, wrapper.price, 'Price should match');
-    }
-
-    @isTest
-    static void testGetProductsByMonthYear_FutureDate() {
-        User testUser = [SELECT Id FROM User WHERE Email = 'testuser@testorg.com' LIMIT 1];
-
-        System.runAs(testUser) {
-            setupTestData();
-
-            Test.startTest();
-            // Test with future dates to ensure no results but code coverage
-            List<TurnOverController.ProductWrapper> products = TurnOverController.getProductsByMonthYear(
-                2030, 1, 2030, 12
-            );
-            Test.stopTest();
-
-            System.assertEquals(0, products.size(), 'Should return 0 products for future dates');
+        System.runAs(distributorUser) {
+            // Use fiscal year dates (Apr 1 - Mar 31)
+            Date startDate = Date.newInstance(Date.today().year(), 4, 1);
+            Date endDate = Date.newInstance(Date.today().year() + 1, 3, 31);
+            
+            Map<String, List<TurnOverController.AggregatePayoutResult>> results = 
+                TurnOverController.getFilteredTurnover(startDate, endDate);
+            
+            System.assert(results.containsKey('Year'), 'Should have yearly results');
+            System.assert(!results.get('Year').isEmpty(), 'Yearly results should not be empty');
         }
+        Test.stopTest();
     }
+    
+   
+   //2
+    @IsTest
+    static void testGetProductsByMonthYearNoDates() {
+        Test.startTest();
+        List<TurnOverController.ProductWrapper> products = 
+            TurnOverController.getProductsByMonthYear(null, null, null, null);
+        
+        System.assert(!products.isEmpty(), 'Should return products without date filters');
+        Test.stopTest();
+    }
+    
+   
+    //3
+    @IsTest
+    static void testGetProductsByMonthYearNoResults() {
+        Test.startTest();
+        List<TurnOverController.ProductWrapper> products = 
+            TurnOverController.getProductsByMonthYear(2000, 1, 2000, 1);
+        
+        System.assert(products.isEmpty(), 'Should return no products for old date range');
+        Test.stopTest();
+    }
+
+
 }

@@ -1,161 +1,320 @@
-@isTest
+@IsTest
 private class PurchaseOrderControllerTest {
 
-    @testSetup
-    static void setupTestData() {
-        List<UserRole> roles = new List<UserRole>{
-            new UserRole(Name = 'Managing Director'),
-            new UserRole(Name = 'National Head, Key Accounts Private'),
-            new UserRole(Name = 'Chief Strategy Officer'),
-            new UserRole(Name = 'Government Projects - Solar Pumps 1'),
-            new UserRole(Name = 'CEO')
-        };
-        insert roles;
-    }
-
-    private static User createAndInsertUserWithRole(String roleName) {
-        UserRole role = [SELECT Id FROM UserRole WHERE Name = :roleName LIMIT 1];
+    // Helper method to create test user with a specific role
+    private static User createTestUser(String roleName) {
         Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+        
+        // Make DeveloperName unique by adding timestamp
+        String uniqueDeveloperName = ('R' + roleName.replaceAll('[^a-zA-Z0-9]', '_').replaceAll('_+', '_').replaceAll('_$', '')) + '_' + DateTime.now().getTime();
+        UserRole r = new UserRole(Name = roleName, DeveloperName = uniqueDeveloperName);
+        insert r;
 
-        String sanitized = roleName.replaceAll('[^a-zA-Z0-9]', '_');
-        String uniqueStr = String.valueOf(DateTime.now().getTime());
-        String email = sanitized + '_' + uniqueStr + '@example.com';
-
-        User u = new User(
-            Username = email,
-            LastName = 'Test',
-            Email = email,
-            Alias = 'tusr',
-            TimeZoneSidKey = 'America/New_York',
-            LocaleSidKey = 'en_US',
+        
+        User testUser = new User(
+            Alias = 'testusr',
+            Email = 'testuser@example.com',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = p.Id,
+            LastName = 'Testing',
             LanguageLocaleKey = 'en_US',
-            UserRoleId = role.Id
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            UserName = 'testuser' + DateTime.now().getTime() + '@example.com',
+            UserRoleId = r.Id
         );
-        insert u;
-        return u;
+        insert testUser;
+        return testUser;
     }
 
-    private static Order createOrder(Account acc, String productType) {
-        Id poRecordTypeId = Schema.SObjectType.Order.getRecordTypeInfosByDeveloperName().get('Purchase_Order').getRecordTypeId();
-        return new Order(
-            AccountId = acc.Id,
-            RecordTypeId = poRecordTypeId,
-            Status = 'Draft',
-            EffectiveDate = Date.today(),
-            Product_Type__c = productType,
-            Approval_Status__c = 'Approved'
-        );
+    // Setup test data for all test methods
+    @TestSetup
+    static void setupTestData() {
+        // Create test Accounts with country information
+        List<Account> accounts = new List<Account>{
+            new Account(Name = 'Test Account 1', BillingCountry = 'India', ShippingCountry = 'India'),
+            new Account(Name = 'Test Account 2', BillingCountry = 'United States', ShippingCountry = 'United States'),
+            new Account(Name = 'Test Account 3', BillingCountry = 'India', ShippingCountry = 'India')
+        };
+        insert accounts;
+
+        // Get Purchase Order RecordTypeId
+        Id purchaseOrderRecordTypeId = Schema.SObjectType.Order.getRecordTypeInfosByDeveloperName()
+            .get('Purchase_Order').getRecordTypeId();
+
+        // Create test Orders for different scenarios
+        List<Order> orders = new List<Order>{
+            // Key Account Private - India (National Head, Key Accounts Private)
+            new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[0].Id,
+                Type__c = 'Key Account Private',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            ),
+            // Key Account Private - International (Key Accounts International Head Private)
+            new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[1].Id,
+                Type__c = 'Key Account Private',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'United States',
+                ShippingCountry = 'United States'
+            ),
+            // Channel Sales - East Region (East Region Head, Channel Sales)
+            new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[2].Id,
+                Type__c = 'Channel Sales',
+                Region__c = 'East',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            ),
+                
+              new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[0].Id,
+                Type__c = 'Channel Sales',
+                Region__c = 'North',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            ),
+                
+                new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[1].Id,
+                Type__c = 'Channel Sales',
+                Region__c = 'South',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            ),
+                
+                new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[2].Id,
+                Type__c = 'Channel Sales',
+                Region__c = 'West',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            ),
+            // Key Account Government - EPC (Chief Strategy Officer)
+            new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[0].Id,
+                Type__c = 'Key Account Government',
+                Product_Type__c = 'EPC',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            ),
+            // Key Account Government - Water Pump (Government Projects - Solar Pumps 1)
+            new Order(
+                RecordTypeId = purchaseOrderRecordTypeId,
+                AccountId = accounts[1].Id,
+                Type__c = 'Key Account Government',
+                Product_Type__c = 'Water Pump',
+                Status = 'Draft',
+                EffectiveDate = System.today(),
+                Approval_Status__c = null,
+                BillingCountry = 'India',
+                ShippingCountry = 'India'
+            )
+        };
+        insert orders;
     }
 
-    @isTest static void testGetPurchaseOrders_ManagingDirector() {
-        User u = createAndInsertUserWithRole('Managing Director');
-        System.runAs(u) {
-            Account acc = new Account(Name = 'Test Account'); insert acc;
-            Order ord = createOrder(acc, 'Modules'); insert ord;
-
+    // Test getPurchaseOrders() for National Head, Key Accounts Private role
+    @IsTest
+    static void testGetPurchaseOrders_NationalHeadPrivate() {
+        User testUser = createTestUser('National Head, Key Accounts Private');
+        
+        System.runAs(testUser) {
             Test.startTest();
             Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
             Test.stopTest();
 
-            System.assert(result.containsKey('orders'));
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('National Head, Key Accounts Private', result.get('userRoleName'), 'Incorrect user role');
+            System.assertNotEquals(0, orders.size(), 'Should return orders for National Head');
         }
     }
 
-    @isTest static void testGetPurchaseOrders_NationalHead() {
-        User u = createAndInsertUserWithRole('National Head, Key Accounts Private');
-        System.runAs(u) {
-            Account acc = new Account(Name = 'Test Account'); insert acc;
-            Order ord = createOrder(acc, 'Modules'); insert ord;
-
+    // Test getPurchaseOrders() for Key Accounts International Head Private role
+    @IsTest
+    static void testGetPurchaseOrders_InternationalHeadPrivate() {
+        User testUser = createTestUser('Key Accounts International Head Private');
+        
+        System.runAs(testUser) {
             Test.startTest();
             Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
             Test.stopTest();
 
-            System.assert(result.containsKey('orders'));
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('Key Accounts International Head Private', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return international orders');
         }
     }
 
-    @isTest static void testGetPurchaseOrders_ChiefStrategyOfficer() {
-        User u = createAndInsertUserWithRole('Chief Strategy Officer');
-        System.runAs(u) {
-            Account acc = new Account(Name = 'Test Account'); insert acc;
-            Order ord = createOrder(acc, 'EPC'); insert ord;
-
+    // Test getPurchaseOrders() for East Region Head, Channel Sales role
+    @IsTest
+    static void testGetPurchaseOrders_EastRegionHead() {
+        User testUser = createTestUser('East Region Head, Channel Sales');
+        
+        System.runAs(testUser) {
             Test.startTest();
             Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
             Test.stopTest();
 
-            System.assert(result.containsKey('orders'));
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('East Region Head, Channel Sales', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return East region orders');
         }
     }
-
-    @isTest static void testGetPurchaseOrders_GovtSolarPumps() {
-        User u = createAndInsertUserWithRole('Government Projects - Solar Pumps 1');
-        System.runAs(u) {
-            Account acc = new Account(Name = 'Test Account'); insert acc;
-            Order ord = createOrder(acc, 'Water Pump'); insert ord;
-
+    
+    // Test getPurchaseOrders() for North Region Head, Channel Sales role
+    @IsTest
+    static void testGetPurchaseOrders_NorthRegionHead() {
+        User testUser = createTestUser('North Region Head, Channel Sales');
+        
+        System.runAs(testUser) {
             Test.startTest();
             Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
             Test.stopTest();
 
-            System.assert(result.containsKey('orders'));
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('North Region Head, Channel Sales', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return North region orders');
         }
     }
-
-    @isTest static void testGetPurchaseOrders_ManagingDirectorCEO() {
-        User u = createAndInsertUserWithRole('CEO');
-        System.runAs(u) {
-            Account acc = new Account(Name = 'Test Account'); insert acc;
-            Order ord = createOrder(acc, 'Modules'); insert ord;
-
+    
+    // Test getPurchaseOrders() for South Region Head, Channel Sales role
+    @IsTest
+    static void testGetPurchaseOrders_SouthRegionHead() {
+        User testUser = createTestUser('South Region Head, Channel Sales');
+        
+        System.runAs(testUser) {
             Test.startTest();
             Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
             Test.stopTest();
 
-            System.assert(result.containsKey('orders'));
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('South Region Head, Channel Sales', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return South region orders');
         }
     }
-
-    @isTest static void testUpdateApprovalStatus() {
-        User u = createAndInsertUserWithRole('Managing Director');
-        System.runAs(u) {
-            Account acc = new Account(Name = 'Test Account'); insert acc;
-            Order ord = createOrder(acc, 'Modules'); insert ord;
-
+    
+    // Test getPurchaseOrders() for West Region Head, Channel Sales role
+    @IsTest
+    static void testGetPurchaseOrders_WestRegionHead() {
+        User testUser = createTestUser('West Region Head, Channel Sales');
+        
+        System.runAs(testUser) {
             Test.startTest();
-            PurchaseOrderController.updateApprovalStatus(ord.Id, 'Approved');
+            Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
             Test.stopTest();
 
-            ord = [SELECT Approval_Status__c FROM Order WHERE Id = :ord.Id];
-            System.assertEquals('Approved', ord.Approval_Status__c);
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('West Region Head, Channel Sales', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return West region orders');
         }
     }
 
-    // ✅ Covers catch block for getPurchaseOrders()
-    @isTest static void testGetPurchaseOrders_ExceptionCase() {
+    // Test getPurchaseOrders() for Chief Strategy Officer role
+    @IsTest
+    static void testGetPurchaseOrders_ChiefStrategyOfficer() {
+        User testUser = createTestUser('Chief Strategy Officer');
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
+            Test.stopTest();
+
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('Chief Strategy Officer', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return EPC orders');
+        }
+    }
+
+    // Test getPurchaseOrders() for Government Projects - Solar Pumps 1 role
+    @IsTest
+    static void testGetPurchaseOrders_SolarPumps() {
+        User testUser = createTestUser('Government Projects - Solar Pumps 1');
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
+            Test.stopTest();
+
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals('Government Projects - Solar Pumps 1', result.get('userRoleName'));
+            System.assertNotEquals(0, orders.size(), 'Should return Water Pump orders');
+        }
+    }
+
+    // Test getPurchaseOrders() for unknown role
+    @IsTest
+    static void testGetPurchaseOrders_UnknownRole() {
+        User testUser = createTestUser('Unknown Role');
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
+            Test.stopTest();
+
+            List<Order> orders = (List<Order>) result.get('orders');
+            System.assertEquals(0, orders.size(), 'Should return empty list for unknown role');
+        }
+    }
+
+
+
+    // Test updateApprovalStatus() - Reject
+    @IsTest
+    static void testUpdateApprovalStatus_Reject() {
+        Order testOrder = [SELECT Id FROM Order WHERE Type__c = 'Key Account Private' LIMIT 1];
+        String rejectionReason = 'Test rejection reason';
+        
+        Test.startTest();
+        PurchaseOrderController.updateApprovalStatus(testOrder.Id, 'Rejected', rejectionReason);
+        Test.stopTest();
+        
+        Order updatedOrder = [SELECT Approval_Status__c, Reason_For_Rejection__c FROM Order WHERE Id = :testOrder.Id];
+        System.assertEquals('Rejected', updatedOrder.Approval_Status__c, 'Status should be Rejected');
+        System.assertEquals(rejectionReason, updatedOrder.Reason_For_Rejection__c, 'Rejection reason should be set');
+    }
+
+    // Test updateApprovalStatus() with invalid Order Id (negative test)
+    @IsTest
+    static void testUpdateApprovalStatus_InvalidOrder() {
+        Boolean exceptionThrown = false;
+        
         Test.startTest();
         try {
-            // Directly running it without context to force failure
-            System.runAs(new User(Id=UserInfo.getUserId())) {
-                Map<String, Object> result = PurchaseOrderController.getPurchaseOrders();
-            }
-        } catch (Exception e) {
-            System.assert(e.getMessage().contains('Error fetching purchase orders'));
+            PurchaseOrderController.updateApprovalStatus('001000000000000', 'Approved', null);
+        } catch (AuraHandledException e) {
+            exceptionThrown = true;
         }
         Test.stopTest();
-    }
-
-    // ✅ Covers catch block for updateApprovalStatus()
-    @isTest static void testUpdateApprovalStatus_ExceptionCase() {
-        Test.startTest();
-        try {
-            PurchaseOrderController.updateApprovalStatus('invalidId', 'Approved');
-        } catch (Exception e) {
-            //System.assert(e.getMessage().contains('Error updating approval status'));
-        }
-        Test.stopTest(); 
+        
+        System.assert(exceptionThrown, 'Should throw exception for invalid Order Id');
     }
 }

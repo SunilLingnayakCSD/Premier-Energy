@@ -8,36 +8,39 @@ import BILLING_COUNTRY_FIELD from '@salesforce/schema/Account.BillingCountryCode
 import BILLING_STATE_FIELD from '@salesforce/schema/Account.BillingStateCode';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import { getPicklistValues } from 'lightning/uiObjectInfoApi';
-import BebasNeueFont from '@salesforce/resourceUrl/BebasNeueFont';
+//import BebasNeueFont from '@salesforce/resourceUrl/BebasNeueFont';
 
 export default class WebToLead extends LightningElement {
     belgaumlogo = belgaumlogo;
     @track showThankYouMessage = false;
+    @track Thankyou = false;
+    @track form = true;
 
     // Country and State handling
     @track countryOptions = [];
     @track stateOptions = [];
     selectedCountry = '';
     selectedState = '';
+    isSubmitting = false;
     controllerValues;
     stateValues;
     totalwattageKWdata
 
     // Form fields
-    salutation = '';
-    firstName = '';
-    lastName = '';
-    phoneNo = '';
-    emailId = '';
-    company = '';
-    Date = '';
-    City = '';
-    PostalCode = '';
-    DCRNonDCR = '';
-    TotalWattageWp = '';
-    EachModuleWpc = '';
-    MonthlyUnitsconsumption = '';
-    
+    @track salutation = '';
+    @track firstName = '';
+    @track lastName = '';
+    @track phoneNo = '';
+    @track emailId = '';
+    @track company = '';
+    @track Date = '';
+    @track City = '';
+    @track PostalCode = '';
+    // @track DCRNonDCR = '';
+    @track TotalWattageWp = '';
+    @track EachModuleWpc = '';
+    @track MonthlyUnitsconsumption = '';
+
     // Error tracking
     @track fieldErrors = {};
     @track duplicateFieldErrors = {
@@ -82,12 +85,18 @@ export default class WebToLead extends LightningElement {
         return !this.selectedCountry || this.stateOptions.length === 0;
     }
 
+
+    get submitButtonLabel() {
+    return this.isSubmitting ? 'Submitting...' : 'Submit';
+}
+
+
     // Event handlers
     handleCountryChange(event) {
         this.selectedCountry = event.detail.value;
         this.selectedState = '';
         this.filterStates(this.selectedCountry);
-        this.fieldErrors.selectedCountry = ''; 
+        this.fieldErrors.selectedCountry = '';
     }
 
     handleStateChange(event) {
@@ -97,7 +106,7 @@ export default class WebToLead extends LightningElement {
 
     LeadChangeVal(event) {
         this[event.target.name] = event.target.value;
-         
+
         // Clear error when field is modified
         if (this.fieldErrors[event.target.name]) {
             this.fieldErrors[event.target.name] = '';
@@ -108,7 +117,7 @@ export default class WebToLead extends LightningElement {
     filterStates(selectedCountry) {
         this.stateOptions = [];
         const controllingValue = this.controllerValues[selectedCountry];
-        
+
         if (controllingValue === undefined) {
             return;
         }
@@ -147,7 +156,7 @@ export default class WebToLead extends LightningElement {
             TotalWattageWp: 'Total Capacity in kWp is required',
             selectedCountry: 'Country is required',
             selectedState: 'State is required',
-            DCRNonDCR: 'DCR/Non-DCR is required'
+            // DCRNonDCR: 'DCR/Non-DCR is required'
         };
 
         Object.keys(requiredFields).forEach(field => {
@@ -181,75 +190,88 @@ export default class WebToLead extends LightningElement {
     // Main submit handler
     async insertLeadAction() {
         console.log('OUTPUT : submit button is clicked');
-        if (!this.validateForm()) {
-            return;
-        }
+        console.log('validation : ', this.validateForm);
+         if (this.isSubmitting) {
+        console.warn('Submission already in progress.');
+        return;
+    }
+        if (this.validateForm()) {
+           this.isSubmitting = true;
 
-        // Calculate Project Capacity in MWp
-        const projectCapacityMWp = parseFloat(this.TotalWattageWp) / 1000;
+            // Calculate Project Capacity in MWp
+            const projectCapacityMWp = parseFloat(this.TotalWattageWp) / 1000;
 
-        console.log('OUTPUT :-projectCapacityMWp- ',projectCapacityMWp); 
-        const companyValue = this.company || this.firstName;
+            console.log('OUTPUT :-projectCapacityMWp- ', projectCapacityMWp);
+            const companyValue = this.company || this.firstName;
 
-        const leadObj = {
-            sobjectType: 'Lead',
-            Salutation : 'He/She', 
-            FirstName: this.firstName || 'N/A',
-            LastName: this.lastName,
-            Phone: this.phoneNo,
-            Email: this.emailId,
-            Company: companyValue,  // Use first name if company not provided
-            CountryCode: this.selectedCountry,
-            City: this.City,
-            StateCode: this.selectedState,
-            PostalCode: this.PostalCode,
-            DCR_Non_DCR__c: this.DCRNonDCR,
-           // Project_Capacity_in_MWp__c: projectCapacityMWp,
-            Delivery_Due_Date__c: this.Date,
-            Each_Module_Wp__c: this.EachModuleWpc,
-            Monthly_Units_consumption__c: this.MonthlyUnitsconsumption,
-            Region__c: 'Default',
-            LeadSource: 'Web',
-            Status: 'New'
-        };
-        // Conditional capacity fields
-        if (projectCapacityMWp < 1) {
-            leadObj.Project_Capacity__c = projectCapacityMWp;
-        } else {
-            leadObj.Total_Capacity_in_MWp__c = projectCapacityMWp;
-        }
+            const leadObj = {
+                sobjectType: 'Lead',
+                Salutation: 'He/She',
+                FirstName: this.firstName || 'N/A',
+                LastName: this.lastName,
+                Phone: this.phoneNo,
+                Email: this.emailId,
+                Company: companyValue,  // Use first name if company not provided
+                CountryCode: this.selectedCountry,
+                City: this.City,
+                StateCode: this.selectedState,
+                PostalCode: this.PostalCode,
+                // DCR_Non_DCR1__c: this.DCRNonDCR,
+                // Project_Capacity_in_MWp__c: projectCapacityMWp,
+                Delivery_Due_Date__c: this.Date,
+                Each_Module_Wp__c: this.EachModuleWpc,
+                Monthly_Units_consumption__c: this.MonthlyUnitsconsumption,
+                Region__c: 'Default',
+                LeadSource: 'Web',
+                Status: 'New'
+            };
+            // Conditional capacity fields
+            if (projectCapacityMWp >= 1) {
+                console.log('OUTPUT : entered into if block', projectCapacityMWp);
+                leadObj.Project_Capacity__c = projectCapacityMWp;
+            } else {
+                console.log('OUTPUT :entered in else block ', projectCapacityMWp);
+                leadObj.Total_Capacity_in_MWp__c = projectCapacityMWp;
+            }
 
-        console.log('OUTPUT : -----leadObj---->',leadObj);
+            console.log('OUTPUT : -----leadObj---->', JSON.stringify(leadObj));
 
 
-        try {
-            const response = await insertLead({ obj: leadObj });
-            console.log('OUTPUT : --leadObj sent to apex--');
-            
-            if (response.status === 'duplicate') {
+            try {
+                const response = await insertLead({ obj: leadObj });
+                console.log('OUTPUT : --leadObj sent to apex--');
+
+            /*if (response.status === 'duplicate') {
                 console.log('OUTPUT : --Entered into duplicate records--');
                 LightningAlert.open({
                     message: response.message || 'A lead with this phone or email already exists.',
                     theme: 'error',
                     label: 'Duplicate Lead',
                 });
-            } else if (response.status === 'success') {
-                console.log('OUTPUT : --Entered into Success--');
-                this.showThankYouMessage = true;
+            }*/ if (response.status === 'success') {
+                    console.log('OUTPUT : --Entered into Success--');
+                    this.showThankYouMessage = true;
+                    LightningAlert.open({
+                        message: 'Thank you! Your information has been submitted successfully.',
+                        theme: 'success',
+                        label: 'Success',
+                    });
+                    this.resetForm();
+                    // this.Thankyou = true;
+                    this.form = false;
+
+                }
+            } catch (error) {
+                console.error('Error:', error);
                 LightningAlert.open({
-                    message: 'Thank you! Your information has been submitted successfully.',
-                    theme: 'success',
-                    label: 'Success',
+                    message: 'An error occurred while submitting your information. Please try again.',
+                    theme: 'error',
+                    label: 'Error',
                 });
-                this.resetForm();
             }
-        } catch (error) {
-            console.error('Error:', error);
-            LightningAlert.open({
-                message: 'An error occurred while submitting your information. Please try again.',
-                theme: 'error',
-                label: 'Error',
-            });
+            finally {
+            this.isSubmitting = false; // ✅ Allow further submissions after done
+        }
         }
     }
 
@@ -265,7 +287,7 @@ export default class WebToLead extends LightningElement {
         this.selectedState = '';
         this.City = '';
         this.PostalCode = '';
-        this.DCRNonDCR = '';
+        // this.DCRNonDCR = '';
         this.TotalWattageWp = '';
         this.Date = '';
         this.EachModuleWpc = '';
@@ -275,7 +297,7 @@ export default class WebToLead extends LightningElement {
         // Reset comboboxes
         const countryCombobox = this.template.querySelector('lightning-combobox[name="country"]');
         const stateCombobox = this.template.querySelector('lightning-combobox[name="state"]');
-        
+
         if (countryCombobox) countryCombobox.value = '';
         if (stateCombobox) stateCombobox.value = '';
     }
@@ -291,7 +313,7 @@ export default class WebToLead extends LightningElement {
     get CapacityError() { return this.fieldErrors.TotalWattageWp; }
     get CountryError() { return this.fieldErrors.selectedCountry; }
     get StateError() { return this.fieldErrors.selectedState; }
-    get DCRNonDCRError() { return this.fieldErrors.DCRNonDCR; }
+    //get DCRNonDCRError() { return this.fieldErrors.DCRNonDCR; }
     get EachModuleWpcError() { return this.fieldErrors.EachModuleWpc; }
     get DeliverDateError() { return this.fieldErrors.Quantity; }
 }
